@@ -1,0 +1,22 @@
+PART ADMINISTRACIÓ (M9)
+
+- Creació de serveis:
+
+ · L'aplicació ha de crear serveis (express per un o diferents ports)
+
+ · Ha de contestar Http request per configuracions, productes, etc o guardar informació puntual.
+
+ · S'ha de fer un manteniment de productes. Eliminar, esborrar, actualitzar i consultar. 
+
+ · Ha de servir web sockets, per actualitzar informació en temps real RTC. Per exemple l'estat del producte actualitzat a tots els clients, mòbils i/o web. 
+
+- Creació de processos:
+
+ · S'han d'aixecar processos diferents per tal de recalcular estadístiques del mòdul 10, o el que es consideri necessari. Aquest s'haurien de llençar des del procés principal amb un setInterval cada cert temps.
+
+ · S'ha de sincronitzar els fils d'execució mitjançant l'ús de promeses.
+
+ · S'ha de fer ús de sessions d'express per tal de poder tindre diferents usuaris autenticats cada un amb la seva informació. Com que el projecte d'M07 se serveix des de la carpeta d'static files, no hi ha problemes de cros origin i podrem utilitzar-ho sense problemes. 
+
+ · Totes les comunicacions han de ser amb JSON, no envieu mai un missatge que no estigui contingut amb una estructura organtizada a l'estil JSON. 
+

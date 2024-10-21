@@ -1,0 +1,11 @@
+PART ADMINISTRACIÓ (M7)
+
+ - Mitjançant web es permet accedir a una part privada on es poden fer 2 funcionalitats:
+
+  · Consultar les comandes per cada dia i anar modificant el seu estat.
+
+  · Modificar els productes ofertats
+
+  · Afegir / treure productes
+
+(versió més senzilla) Activar / desactivar productes 
