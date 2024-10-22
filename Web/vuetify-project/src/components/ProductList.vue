@@ -8,7 +8,6 @@
         md="4"
       >
         <v-card>
-          <v-img :src="product.Imatge" height="200px"></v-img>
           <v-card-title>{{ product.nomProducte }}</v-card-title>
           <v-card-subtitle>{{ product.Descripcio }}</v-card-subtitle>
           <v-card-text>
@@ -21,24 +20,15 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted } from "vue";
-import productData from "@/assets/productes.json";
+import { getProductes } from "../services/communicationManager.js";
 
-export default {
-  name: "ProductList",
-  setup() {
-    const productes = ref([]);
+const productes = ref([]);
 
-    onMounted(() => {
-      productes.value = productData.productes;
-    });
-
-    return {
-      productes,
-    };
-  },
-};
+onMounted(async () => {
+  productes.value = await getProductes();
+});
 </script>
 
 <style scoped>
