@@ -4,7 +4,7 @@ INSERT INTO
         Nom,
         Correu,
         Contrasenya,
-        Targeta
+        Targeta,
     )
 VALUES (
         'User1',
