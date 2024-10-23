@@ -103,26 +103,43 @@ app.post('/postProducte', (req, res) => {
     });
 });
 
-// TODO: Llegir els productes de la Base de Dades
-app.get('/getProductesBD', (req, res) => {
-
-    mysql.createConnection({
+// Crear connexió de Base de Dades
+async function createConnection() {
+        mysql.createConnection({
         host: 'dam.inspedralbes.cat',
         user: 'a21rublormar_admin',
         password: 'InsPedralbes2024',
         database: 'a21rublormar_TR1_GR6'
     })
-        .then(connection => {
-            console.log("Connexió creada")
-            return connection.execute('SELECT * FROM productes')
-                .then(([resultats, camps]) => {
-                    console.log(resultats);
-                })
-                .finally(() => connection.end());
-        })
-        .catch(err => {
-            console.error('Error: ', err);
-        });
+    .then(console.log("Connexió creada"))
+    .catch(err => {
+        console.error('Error de connexió: ' + err);
+    })
+    .finally(connection => {
+        return connection;
+    });
+}
+
+// Get Preguntes Base de Dades
+app.get('/getProductesBD', async (req, res) => {
+    const connection = await createConnection();
+    return connection.execute('SELECT * FROM producte')
+    .then(([resultats]) => {    
+        const response = {
+            productes: resultats.map(producte => ({
+                idProducte: producte.idProducte,
+                nomProducte: producte.nomProducte,
+                Descripcio: producte.Descripcio,
+                Preu: parseFloat(producte.Preu),
+                Stock: producte.Stock,
+                Imatge: producte.Imatge
+            }))
+        };
+        res.json(response);
+    })
+    .finally(() => {
+        connection.end();
+    });
 });
 
 // Iniciar el servidor
