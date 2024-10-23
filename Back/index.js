@@ -4,6 +4,7 @@ const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
 const PORT = 3001;
+const path = require('path');
 const cors = require('cors');
 app.use(express.json());
 app.use(cors());
@@ -17,6 +18,8 @@ fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
     }
     json = JSON.parse(data);
 })
+
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.get('/', (req, res) => {
     res.send(json)

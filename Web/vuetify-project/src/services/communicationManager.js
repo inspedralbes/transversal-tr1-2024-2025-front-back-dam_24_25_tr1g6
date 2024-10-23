@@ -9,4 +9,16 @@ export async function getProductes() {
     return data;
 }
 
+export async function crearProductes() {
+
+}
+
+export async function modificarProducte() {
+
+}
+
+export async function eliminarProducte() {
+
+}
+
 
