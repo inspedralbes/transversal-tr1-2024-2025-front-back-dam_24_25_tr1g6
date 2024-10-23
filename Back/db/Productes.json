@@ -49,6 +49,15 @@
       "Activat": true,
       "Imatge": "",
       "idProducte": 6
+    },
+    {
+      "nomProducte": "",
+      "Descripcio": "",
+      "Preu": 0,
+      "Stock": 0,
+      "Activat": 0,
+      "Imatge": "",
+      "idProducte": 7
     }
   ]
 }
