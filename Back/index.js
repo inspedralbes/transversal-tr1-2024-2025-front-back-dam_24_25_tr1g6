@@ -52,6 +52,8 @@ app.delete('/deleteProduct/:id', (req, res) => {
         }
         res.send('Producte eliminat correctament');
     });
+
+
 });
 
 // Actualitzar Producte JSON
@@ -86,21 +88,23 @@ app.put('/putProducte/:id', (req, res) => {
 // Afegir Producte JSON
 app.post('/postProducte', (req, res) => {
     const newProduct = req.body;
-    let productes = json.productes; 
+    let productes = json.productes;
 
     const newIndex = productes.length + 1;
     newProduct.idProducte = newIndex;
     productes.push(newProduct);
 
     json.productes = productes;
+    console.log("array productes", productes);
 
     fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
         if (err) {
             console.error('Error escrivint el fitxer JSON', err);
             return res.status(500).send('Error afegint el producte');
         }
-        res.send('Producte afegit correctament');
+        res.json({ message: 'Producte afegit correctament!', product: newProduct })
     });
+
 });
 
 // TODO: Llegir els productes de la Base de Dades

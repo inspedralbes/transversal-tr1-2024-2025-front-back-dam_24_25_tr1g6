@@ -64,12 +64,7 @@
                 v-model="addProduct.Activat"
                 label="Activat"
               ></v-checkbox>
-              <v-btn
-                @click="toggleAddProductForm()"
-                type="submit"
-                color="primary"
-                >Afegir</v-btn
-              >
+              <v-btn type="submit" color="primary">Afegir</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -158,6 +153,7 @@ const callAddProduct = async () => {
       Imatge: "",
     };
     showAddProductForm.value = false;
+    console.log("productes", productes);
   } catch (error) {
     console.error("Error adding product:", error);
   }
@@ -170,7 +166,6 @@ const filteredProductes = computed(() => {
       product.nomProducte.toLowerCase().includes(search.value.toLowerCase())
     );
 
-  console.log("Prpductos filtrados: ", filtered);
   return filtered;
 });
 
