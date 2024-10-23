@@ -51,6 +51,55 @@ app.delete('/deleteProduct/:id', (req, res) => {
     });
 });
 
+// Actualitzar Producte JSON
+app.put('/putProducte/:id', (req, res) => {
+    const idProduct = parseInt(req.params.id);
+    let productes = json.productes;
+
+    const producte = productes.find(p => p.idProducte === idProduct);
+
+    if (!producte) {
+        return res.status(404).send("Producte no trobat");
+    }
+
+    producte.nomProducte = req.body.nomProducte || producte.nomProducte;
+    producte.Descripcio = req.body.Descripcio || producte.Descripcio;
+    producte.Preu = req.body.Preu || producte.Preu;
+    producte.Stock = req.body.Stock || producte.Stock;
+    producte.Imatge = req.body.Imatge || producte.Imatge;
+
+    json.productes = productes;
+
+    fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
+        if (err) {
+            console.error('Error escrivint el fitxer JSON', err);
+            return res.status(500).send('Error actualitzant el producte');
+        }
+        res.send('Producte actualitzat correctament');
+    });
+});
+
+
+// Afegir Producte JSON
+app.post('/postProducte', (req, res) => {
+    const newProduct = req.body;
+    let productes = json.productes; 
+
+    const newIndex = productes.length + 1;
+    newProduct.idProducte = newIndex;
+    productes.push(newProduct);
+
+    json.productes = productes;
+
+    fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
+        if (err) {
+            console.error('Error escrivint el fitxer JSON', err);
+            return res.status(500).send('Error afegint el producte');
+        }
+        res.send('Producte afegit correctament');
+    });
+});
+
 // TODO: Llegir els productes de la Base de Dades
 app.get('/getProductesBD', (req, res) => {
 

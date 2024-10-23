@@ -1,36 +1,36 @@
 {
-    "productes": [
-        {
-            "idProducte": 1,
-            "nomProducte": "Orange Juice",
-            "Descripcio": "Freshly squeezed orange juice",
-            "Preu": 3.50,
-            "Stock": 100,
-            "Imatge": "http://example.com/orange_juice.jpg"
-        },
-        {
-            "idProducte": 2,
-            "nomProducte": "Apple Juice",
-            "Descripcio": "100% pure apple juice",
-            "Preu": 2.75,
-            "Stock": 150,
-            "Imatge": "http://example.com/apple_juice.jpg"
-        },
-        {
-            "idProducte": 3,
-            "nomProducte": "Grape Juice",
-            "Descripcio": "Organic grape juice",
-            "Preu": 4.00,
-            "Stock": 80,
-            "Imatge": "http://example.com/grape_juice.jpg"
-        },
-        {
-            "idProducte": 4,
-            "nomProducte": "Pineapple Juice",
-            "Descripcio": "Tropical pineapple juice",
-            "Preu": 3.25,
-            "Stock": 120,
-            "Imatge": "http://example.com/pineapple_juice.jpg"
-        }
-    ]
+  "productes": [
+    {
+      "idProducte": 1,
+      "nomProducte": "Orange Juice",
+      "Descripcio": "Freshly squeezed orange juice",
+      "Preu": 4,
+      "Stock": 95,
+      "Imatge": "http://example.com/orange_juice.jpg"
+    },
+    {
+      "idProducte": 2,
+      "nomProducte": "Apple Juice",
+      "Descripcio": "100% pure apple juice",
+      "Preu": 2.75,
+      "Stock": 150,
+      "Imatge": "http://example.com/apple_juice.jpg"
+    },
+    {
+      "idProducte": 3,
+      "nomProducte": "Grape Juice",
+      "Descripcio": "Organic grape juice",
+      "Preu": 4,
+      "Stock": 80,
+      "Imatge": "http://example.com/grape_juice.jpg"
+    },
+    {
+      "idProducte": 4,
+      "nomProducte": "Pineapple Juice",
+      "Descripcio": "Tropical pineapple juice",
+      "Preu": 3.25,
+      "Stock": 120,
+      "Imatge": "http://example.com/pineapple_juice.jpg"
+    }
+  ]
 }
