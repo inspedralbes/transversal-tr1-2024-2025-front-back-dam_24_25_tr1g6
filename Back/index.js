@@ -1,16 +1,30 @@
 "use strict";
 const express = require('express');
 const app = express();
+const fs = require('fs')
 const mysql = require('mysql2/promise');
 const PORT = 3001;
 const cors = require('cors');
 app.use(express.json());
 app.use(cors());
 
+let json;
+
+fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
+    if (err) {
+        console.error('Error leyendo el JSON');
+        return;
+    }
+    json = JSON.parse(data);
+})
+
+app.get('/', (req, res) => {
+    res.send(json)
+})
+
 // Llegir el fitxer JSON amb els productes
 app.get('/getProductesJson', (req, res) => {
-    let productes = require('./db/Productes.json');
-    res.json(productes);
+    res.send(json.productes);
 });
 
 // TODO: Llegir els productes de la Base de Dades

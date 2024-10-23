@@ -27,7 +27,11 @@ import { getProductes } from "../services/communicationManager.js";
 const productes = ref([]);
 
 onMounted(async () => {
-  productes.value = await getProductes();
+  try {
+    productes.value = await getProductes();
+  } catch (error) {
+    console.error("Error fetching JSON");
+  }
 });
 </script>
 
