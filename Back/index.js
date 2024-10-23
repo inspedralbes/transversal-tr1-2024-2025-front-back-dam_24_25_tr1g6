@@ -27,6 +27,30 @@ app.get('/getProductesJson', (req, res) => {
     res.send(json.productes);
 });
 
+// Eliminar producte JSON
+app.delete('/deleteProduct/:id', (req, res) => {
+    const idProduct = parseInt(req.params.id);
+    let productes = json.productes;
+
+    const producteIndex = productes.findIndex(p => parseInt(p.idProducte) === idProduct);
+    if (producteIndex === -1) {
+        return res.status(404).send('Producte no trobat');
+    };
+
+    productes.splice(producteIndex, 1);
+    console.log("Producte esborrat: " + productes[producteIndex]);
+
+    json.productes = productes;
+
+    fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
+        if (err) {
+            console.error('Error escrivint el fitxer JSON', err);
+            return res.status(500).send('Error eliminant el producte');
+        }
+        res.send('Producte eliminat correctament');
+    });
+});
+
 // TODO: Llegir els productes de la Base de Dades
 app.get('/getProductesBD', (req, res) => {
 
