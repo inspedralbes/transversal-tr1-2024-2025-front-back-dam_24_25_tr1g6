@@ -4,9 +4,9 @@
             "nomProducte": "Orange Juice",
             "Descripcio": "Freshly squeezed orange juice",
             "Preu": 3.50,
-            "Stock": 100,
+            "Stock": 0,
             "Activat": 0,
-            "Imatge": "http://example.com/orange_juice.jpg"
+            "Imatge": "http://localhost:3001/assets/orange-juice.jpg"
         },
         {
             "nomProducte": "Apple Juice",
@@ -14,7 +14,7 @@
             "Preu": 2.75,
             "Stock": 150,
             "Activat": 1,
-            "Imatge": "http://example.com/apple_juice.jpg"
+            "Imatge": "http://localhost:3001/assets/apple-juice.jpg"
         },
         {
             "nomProducte": "Grape Juice",
@@ -22,7 +22,7 @@
             "Preu": 4.00,
             "Stock": 80,
             "Activat": 1,
-            "Imatge": "http://example.com/grape_juice.jpg"
+            "Imatge": "http://localhost:3001/assets/grape-juice.jpg"
         },
         {
             "nomProducte": "Pineapple Juice",
@@ -30,7 +30,7 @@
             "Preu": 3.25,
             "Stock": 120,
             "Activat": 1,
-            "Imatge": "http://example.com/pineapple_juice.jpg"
+            "Imatge": "http://localhost:3001/assets/pineapple-juice.jpg"
         }
     ]
 }

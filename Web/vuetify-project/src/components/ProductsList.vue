@@ -22,8 +22,8 @@
       </v-col>
     </v-row>
 
-    <v-row v-if="showAddProductForm">
-      <v-col cols="12">
+    <v-row v-if="showAddProductForm" justify="center">
+      <v-col cols="12" md="8" lg="6">
         <v-card>
           <v-card-title>Afegir Nou Producte</v-card-title>
           <v-card-text>
@@ -37,30 +37,39 @@
               <v-text-field
                 v-model="addProduct.Descripcio"
                 label="Descripcio"
+                dense
                 required
               ></v-text-field>
               <v-text-field
                 v-model="addProduct.Preu"
                 label="Preu"
                 type="number"
+                dense
                 required
               ></v-text-field>
               <v-text-field
                 v-model="addProduct.Stock"
                 label="Stock"
                 type="number"
+                dense
                 required
               ></v-text-field>
               <v-text-field
                 v-model="addProduct.Imatge"
                 label="Imatge URL"
+                dense
                 required
               ></v-text-field>
               <v-checkbox
                 v-model="addProduct.Activat"
                 label="Activat"
               ></v-checkbox>
-              <v-btn type="submit" color="primary">Afegir</v-btn>
+              <v-btn
+                @click="toggleAddProductForm()"
+                type="submit"
+                color="primary"
+                >Afegir</v-btn
+              >
             </v-form>
           </v-card-text>
         </v-card>
@@ -68,29 +77,44 @@
     </v-row>
 
     <v-row>
-      <v-col
-        v-for="product in filteredProductes"
-        :key="product.nomProducte"
-        cols="12"
-        md="4"
-      >
-        <v-card align="center" justify="space-between" w="100">
-          <v-img :src="product.Imatge" height="200px"></v-img>
-          <v-card-title>{{ product.nomProducte }}</v-card-title>
-          <v-card-subtitle>{{ product.Descripcio }}</v-card-subtitle>
-          <v-card-text>
-            <span v-if="product.Activat === 1" class="activated">Activado</span>
-            <span v-else class="blocked">Desactivado</span>
-          </v-card-text>
-          <v-card-text>
-            <div>Price: ${{ product.Preu }}</div>
-            <div>Stock: {{ product.Stock }}</div>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="editar(product)">Editar</v-btn>
-            <v-btn @click="eliminar(product)">Eliminar</v-btn>
-          </v-card-actions>
-        </v-card>
+      <v-col cols="12">
+        <v-list>
+          <v-list-item
+            v-for="product in filteredProductes"
+            :key="product.nomProducte"
+          >
+            <v-list-item-content>
+              <v-list-item-title>
+                <span v-if="product.Stock > 0" class="stock-disponible"
+                  >Stock disponible {{ product.Stock }}</span
+                >
+                <span v-else class="stock-no-disponible">Sin stock</span>
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                <span v-if="product.Activat === 1" class="activated"
+                  >Activado</span
+                >
+                <span v-else class="blocked">Desactivado</span>
+              </v-list-item-subtitle>
+              <v-list-item-subtitle
+                >Nom: {{ product.nomProducte }}</v-list-item-subtitle
+              >
+              <v-list-item-subtitle
+                >Descripcio: {{ product.Descripcio }}</v-list-item-subtitle
+              >
+              <v-list-item-subtitle
+                >Preu: ${{ product.Preu }}</v-list-item-subtitle
+              >
+            </v-list-item-content>
+            <v-list-item-avatar>
+              <v-img :src="product.Imatge" height="50" width="50"></v-img>
+            </v-list-item-avatar>
+            <v-list-item-action>
+              <v-btn @click="editar(product)">Editar</v-btn>
+              <v-btn @click="eliminar(product)">Eliminar</v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
       </v-col>
     </v-row>
   </v-container>
@@ -140,14 +164,24 @@ const callAddProduct = async () => {
 };
 
 const filteredProductes = computed(() => {
-  return productes.value.filter((product) =>
-    product.nomProducte.toLowerCase().includes(search.value.toLowerCase())
-  );
+  const filtered = productes.value
+    .filter((product) => product && product.nomProducte)
+    .filter((product) =>
+      product.nomProducte.toLowerCase().includes(search.value.toLowerCase())
+    );
+
+  console.log("Prpductos filtrados: ", filtered);
+  return filtered;
 });
 
 onMounted(async () => {
   try {
-    productes.value = await getProductes();
+    const response = await getProductes();
+    if (Array.isArray(response)) {
+      productes.value = response;
+    } else {
+      console.error("El JSON de productos no es un array");
+    }
   } catch (error) {
     console.error("Error fetching JSON:", error);
   }
