@@ -5,6 +5,7 @@
             "Descripcio": "Freshly squeezed orange juice",
             "Preu": 3.50,
             "Stock": 100,
+            "Activat": 0,
             "Imatge": "http://example.com/orange_juice.jpg"
         },
         {
@@ -12,6 +13,7 @@
             "Descripcio": "100% pure apple juice",
             "Preu": 2.75,
             "Stock": 150,
+            "Activat": 1,
             "Imatge": "http://example.com/apple_juice.jpg"
         },
         {
@@ -19,6 +21,7 @@
             "Descripcio": "Organic grape juice",
             "Preu": 4.00,
             "Stock": 80,
+            "Activat": 1,
             "Imatge": "http://example.com/grape_juice.jpg"
         },
         {
@@ -26,6 +29,7 @@
             "Descripcio": "Tropical pineapple juice",
             "Preu": 3.25,
             "Stock": 120,
+            "Activat": 1,
             "Imatge": "http://example.com/pineapple_juice.jpg"
         }
     ]
