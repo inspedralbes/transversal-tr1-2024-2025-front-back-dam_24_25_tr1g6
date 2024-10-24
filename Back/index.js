@@ -142,6 +142,70 @@ app.get('/getProductesBD', async (req, res) => {
     });
 });
 
+// Post Producte Base de Dades
+app.post('/postProducteBD', async (req, res) => {
+    const { nomProducte, Descripcio, Preu, Stock, Imatge } = req.body;
+    
+    const connection = await createConnection();
+
+    return connection.execute(
+        `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge) 
+        VALUES (?, ?, ?, ?, ?)`, 
+        [nomProducte, Descripcio, Preu, Stock, Imatge]
+    )
+    .then(() => {
+        res.json({
+            message: 'Producte afegit correctament', 
+            producte: { nomProducte, Descripcio, Preu, Stock, Imatge }
+        });
+    })
+    .finally(() => {
+        connection.end();
+    });
+});
+
+// Update Producte Base de Dades
+app.put('/putProducteBD/:id', async (req, res) => {
+    const idProducte = parseInt(req.params.id);
+
+    const { nomProducte, Descripcio, Preu, Stock, Imatge } = req.body;
+
+    const connection = await createConnection();
+
+    return connection.execute(
+        `UPDATE producte 
+        SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ? 
+        WHERE idProducte = ?`, 
+        [nomProducte, Descripcio, Preu, Stock, Imatge, idProducte]
+    )
+    .then(() => {
+        res.json({
+            message: 'Producte actualitzat correctament', 
+            producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Imatge }
+        });
+    })
+    .finally(() => {
+        connection.end();
+    });
+});
+
+// Delete Producte Base de Dades
+app.delete('/deleteProducteBD/:id', async (req, res) => {
+    const idProducte = parseInt(req.params.id);
+
+    const connection = await createConnection();
+
+    return connection.execute(`DELETE FROM producte WHERE idProducte = ?`, idProducte)
+    .then(() => {
+        res.json({
+            message: 'Producte eliminat correctament'
+        });
+    })
+    .finally(() => {
+        connection.end();
+    });
+});
+
 // Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
