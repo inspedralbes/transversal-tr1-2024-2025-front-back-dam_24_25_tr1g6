@@ -10,7 +10,7 @@
           Productes
         </v-btn>
 
-        <v-btn>
+        <v-btn to="/categories">
           <v-icon>mdi-heart</v-icon>
 
           Categories
