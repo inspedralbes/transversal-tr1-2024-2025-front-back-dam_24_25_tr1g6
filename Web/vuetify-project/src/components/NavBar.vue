@@ -4,7 +4,7 @@
     <v-spacer></v-spacer>
     <v-layout class="overflow-visible" style="height: 56px">
       <v-bottom-navigation v-model="value" color="teal" grow rounded="lg">
-        <v-btn>
+        <v-btn to="/productes">
           <v-icon>mdi-history</v-icon>
 
           Productes

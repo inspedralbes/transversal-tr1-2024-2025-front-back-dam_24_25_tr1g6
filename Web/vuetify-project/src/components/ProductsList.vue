@@ -8,7 +8,7 @@
         <v-btn
           prepend-icon="mdi-plus"
           variant="outlined"
-          class="btn-lightseagreen"
+          class="btn-afegir-producte"
           @click="toggleAddProductForm"
         >
           Afegir Producte
@@ -24,7 +24,6 @@
           variant="solo"
           hide-details
           single-line
-          @click:append-inner="onClick"
         ></v-text-field>
       </v-col>
     </v-row>
@@ -96,7 +95,7 @@
                   ></v-checkbox>
                 </v-col>
               </v-row>
-              <v-btn type="submit" class="btn-lightseagreen">Afegir</v-btn>
+              <v-btn type="submit" class="btn-afegir-producte">Afegir</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -158,10 +157,97 @@
                   <v-btn @click="editar(product)" icon color="primary">
                     <v-icon>mdi-pencil</v-icon>
                   </v-btn>
-                  <v-btn @click="eliminar(product)" icon color="red">
+                  <v-btn
+                    @click="callDeleteProduct(product.idProducte)"
+                    icon
+                    color="red"
+                  >
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </v-list-item-action>
+              </v-col>
+            </v-row>
+            <v-row
+              v-if="
+                editingProduct &&
+                editingProduct.idProducte === product.idProducte
+              "
+            >
+              <v-col cols="12">
+                <v-card class="edit-product-card">
+                  <v-card-title class="headline">Editar Producte</v-card-title>
+                  <v-card-text>
+                    <v-form @submit.prevent="callEditProduct">
+                      <v-row>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.nomProducte"
+                            label="Nom Producte"
+                            prepend-icon="mdi-tag"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Descripcio"
+                            label="Descripcio"
+                            prepend-icon="mdi-text"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Preu"
+                            label="Preu"
+                            prepend-icon="mdi-currency-usd"
+                            type="number"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Stock"
+                            label="Stock"
+                            prepend-icon="mdi-package-variant"
+                            type="number"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Imatge"
+                            label="Imatge URL"
+                            prepend-icon="mdi-image"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-checkbox
+                            v-model="editingProduct.Activat"
+                            label="Activat"
+                            dense
+                          ></v-checkbox>
+                        </v-col>
+                      </v-row>
+                      <v-btn type="submit" color="primary" class="mt-4"
+                        >Guardar</v-btn
+                      >
+                      <v-btn @click="cancelEdit" color="secondary" class="mt-4"
+                        >Cancelar</v-btn
+                      >
+                    </v-form>
+                  </v-card-text>
+                </v-card>
               </v-col>
             </v-row>
           </v-list-item>
@@ -191,6 +277,8 @@ const addProduct = ref({
   Activat: 0,
   Imatge: "",
 });
+const editingProduct = ref(null);
+const loading = ref(false); // Definir la propiedad loading
 
 const toggleAddProductForm = () => {
   showAddProductForm.value = !showAddProductForm.value;
@@ -198,8 +286,10 @@ const toggleAddProductForm = () => {
 
 const callAddProduct = async () => {
   try {
+    loading.value = true; // Iniciar el estado de carga
     const nouProduct = await crearProductes(addProduct.value);
-    productes.value.push(nouProduct);
+    if (nouProduct && nouProduct.idProducte) {
+    }
     addProduct.value = {
       nomProducte: "",
       Descripcio: "",
@@ -209,10 +299,51 @@ const callAddProduct = async () => {
       Imatge: "",
     };
     showAddProductForm.value = false;
-    console.log("productes", productes);
   } catch (error) {
     console.error("Error adding product:", error);
+  } finally {
+    productes.value = await getProductes();
+    loading.value = false; // Finalizar el estado de carga
   }
+};
+
+const callEditProduct = async () => {
+  try {
+    const updatedProduct = await modificarProducte(editingProduct.value);
+    if (!updatedProduct || !updatedProduct.idProducte) {
+      throw new Error("Error updating product");
+    }
+
+    const index = productes.value.findIndex(
+      (p) => p.idProducte === updatedProduct.idProducte
+    );
+
+    if (index !== -1) {
+      productes.value[index] = updatedProduct;
+    }
+    editingProduct.value = null;
+  } catch (error) {
+    console.error("Error updating product:", error);
+  }
+};
+
+const callDeleteProduct = async (idProducte) => {
+  try {
+    await eliminarProducte(idProducte);
+    productes.value = productes.value.filter(
+      (p) => p.idProducte !== idProducte
+    );
+  } catch (error) {
+    console.error("Error deleting product:", error);
+  }
+};
+
+const cancelEdit = () => {
+  editingProduct.value = null;
+};
+
+const editar = (product) => {
+  editingProduct.value = { ...product };
 };
 
 const filteredProductes = computed(() => {
@@ -238,7 +369,6 @@ onMounted(async () => {
   }
 });
 </script>
-
 <style scoped>
 .v-card {
   margin-bottom: 20px;
@@ -250,8 +380,11 @@ onMounted(async () => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-lightseagreen {
-  background-color: lightseagreen;
+.edit-product-card {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
 .headline {
@@ -263,21 +396,25 @@ onMounted(async () => {
 .activated {
   background-color: lightgreen;
   padding: 5px;
-  border-radius: 10px; /* Bordes redondeados */
+  border-radius: 10px;
 }
 
 .blocked {
   background-color: lightcoral;
   padding: 5px;
-  border-radius: 10px; /* Bordes redondeados */
+  border-radius: 10px;
+}
+
+.btn-afegir-producte {
+  background-color: lightseagreen;
 }
 
 .stock-disponible {
-  color: lightgreen;
+  color: green;
 }
 
 .stock-no-disponible {
-  color: lightcoral;
+  color: red;
 }
 
 .product-list-item {

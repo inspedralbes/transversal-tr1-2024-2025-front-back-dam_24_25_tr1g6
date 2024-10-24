@@ -21,12 +21,10 @@ fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-app.get('/', (req, res) => {
-    res.send(json)
-})
+
 
 // Llegir el fitxer JSON amb els productes
-app.get('/getProductesJson', (req, res) => {
+app.get('/getProductes', (req, res) => {
     res.send(json.productes);
 });
 
@@ -50,10 +48,9 @@ app.delete('/deleteProduct/:id', (req, res) => {
             console.error('Error escrivint el fitxer JSON', err);
             return res.status(500).send('Error eliminant el producte');
         }
-        res.send('Producte eliminat correctament');
+        console.log("producte index", idProduct);
+        res.json(idProduct);
     });
-
-
 });
 
 // Actualitzar Producte JSON
@@ -80,7 +77,7 @@ app.put('/putProducte/:id', (req, res) => {
             console.error('Error escrivint el fitxer JSON', err);
             return res.status(500).send('Error actualitzant el producte');
         }
-        res.send('Producte actualitzat correctament');
+        res.json(producte);
     });
 });
 
