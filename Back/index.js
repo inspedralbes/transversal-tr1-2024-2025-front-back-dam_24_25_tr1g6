@@ -105,64 +105,75 @@ app.post('/postProducte', (req, res) => {
 });
 
 // Crear connexió de Base de Dades
-async function createConnection() {
-        mysql.createConnection({
+function createConnection() {
+    return mysql.createConnection({
         host: 'dam.inspedralbes.cat',
         user: 'a21rublormar_admin',
         password: 'InsPedralbes2024',
         database: 'a21rublormar_TR1_GR6'
     })
-    .then(console.log("Connexió creada"))
-    .catch(err => {
-        console.error('Error de connexió: ' + err);
-    })
-    .finally(connection => {
-        return connection;
-    });
+        .then(connection => {
+            console.log("Connexió creada");
+            return connection;
+        })
+        .catch(err => {
+            console.error('Error de connexió: ' + err);
+            throw err; // Re-lanzar el error para que pueda ser manejado por el llamador
+        });
 }
 
 // Get Preguntes Base de Dades
-app.get('/getProductesBD', async (req, res) => {
-    const connection = await createConnection();
-    return connection.execute('SELECT * FROM producte')
-    .then(([resultats]) => {    
-        const response = {
-            productes: resultats.map(producte => ({
-                idProducte: producte.idProducte,
-                nomProducte: producte.nomProducte,
-                Descripcio: producte.Descripcio,
-                Preu: parseFloat(producte.Preu),
-                Stock: producte.Stock,
-                Imatge: producte.Imatge
-            }))
-        };
-        res.json(response);
-    })
-    .finally(() => {
-        connection.end();
-    });
+app.get('/getProductesBD', (req, res) => {
+    createConnection()
+        .then(connection => {
+            return connection.connect()
+                .then(() => {
+                    return connection.query('SELECT * FROM producte');
+                })
+                .then(([resultats]) => {
+                    const response = {
+                        productes: resultats.map(producte => ({
+                            idProducte: producte.idProducte,
+                            nomProducte: producte.nomProducte,
+                            Descripcio: producte.Descripcio,
+                            Preu: parseFloat(producte.Preu),
+                            Stock: producte.Stock,
+                            Imatge: producte.Imatge,
+                            Activat: producte.Activat
+                        }))
+                    };
+                    res.json(response);
+                })
+                .finally(() => {
+                    connection.end();
+                });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error);
+            res.status(500).send('Error fetching products');
+        });
 });
 
 // Post Producte Base de Dades
 app.post('/postProducteBD', async (req, res) => {
     const { nomProducte, Descripcio, Preu, Stock, Imatge } = req.body;
-    
+
     const connection = await createConnection();
 
     return connection.execute(
         `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge) 
-        VALUES (?, ?, ?, ?, ?)`, 
+        VALUES (?, ?, ?, ?, ?)`,
         [nomProducte, Descripcio, Preu, Stock, Imatge]
     )
-    .then(() => {
-        res.json({
-            message: 'Producte afegit correctament', 
-            producte: { nomProducte, Descripcio, Preu, Stock, Imatge }
+        .then(() => {
+            res.json({
+                message: 'Producte afegit correctament',
+                producte: { nomProducte, Descripcio, Preu, Stock, Imatge }
+            });
+        })
+        .finally(() => {
+            connection.end();
         });
-    })
-    .finally(() => {
-        connection.end();
-    });
 });
 
 // Update Producte Base de Dades
@@ -176,18 +187,18 @@ app.put('/putProducteBD/:id', async (req, res) => {
     return connection.execute(
         `UPDATE producte 
         SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ? 
-        WHERE idProducte = ?`, 
+        WHERE idProducte = ?`,
         [nomProducte, Descripcio, Preu, Stock, Imatge, idProducte]
     )
-    .then(() => {
-        res.json({
-            message: 'Producte actualitzat correctament', 
-            producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Imatge }
+        .then(() => {
+            res.json({
+                message: 'Producte actualitzat correctament',
+                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Imatge }
+            });
+        })
+        .finally(() => {
+            connection.end();
         });
-    })
-    .finally(() => {
-        connection.end();
-    });
 });
 
 // Delete Producte Base de Dades
@@ -197,14 +208,14 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
     const connection = await createConnection();
 
     return connection.execute(`DELETE FROM producte WHERE idProducte = ?`, idProducte)
-    .then(() => {
-        res.json({
-            message: 'Producte eliminat correctament'
+        .then(() => {
+            res.json({
+                message: 'Producte eliminat correctament'
+            });
+        })
+        .finally(() => {
+            connection.end();
         });
-    })
-    .finally(() => {
-        connection.end();
-    });
 });
 
 // Iniciar el servidor

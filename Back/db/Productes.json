@@ -1,7 +1,7 @@
 {
   "productes": [
     {
-      "nomProducte": "grape juice",
+      "nomProducte": "grape juicejdhajhda",
       "Descripcio": "Organic grape juice",
       "Preu": "3.7",
       "Stock": 80,
@@ -50,6 +50,15 @@
       "Descripcio": "prueba4",
       "Preu": "2.6",
       "Stock": "5267890",
+      "Activat": 0,
+      "Imatge": "",
+      "idProducte": 7
+    },
+    {
+      "nomProducte": "dakjdnakjdn",
+      "Descripcio": "kndkjndkj",
+      "Preu": "3",
+      "Stock": 0,
       "Activat": 0,
       "Imatge": "",
       "idProducte": 7
