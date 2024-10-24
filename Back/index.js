@@ -21,12 +21,10 @@ fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-app.get('/', (req, res) => {
-    res.send(json)
-})
+
 
 // Llegir el fitxer JSON amb els productes
-app.get('/getProductesJson', (req, res) => {
+app.get('/getProductes', (req, res) => {
     res.send(json.productes);
 });
 
@@ -50,7 +48,8 @@ app.delete('/deleteProduct/:id', (req, res) => {
             console.error('Error escrivint el fitxer JSON', err);
             return res.status(500).send('Error eliminant el producte');
         }
-        res.send('Producte eliminat correctament');
+        console.log("producte index", idProduct);
+        res.json(idProduct);
     });
 });
 
@@ -78,7 +77,7 @@ app.put('/putProducte/:id', (req, res) => {
             console.error('Error escrivint el fitxer JSON', err);
             return res.status(500).send('Error actualitzant el producte');
         }
-        res.send('Producte actualitzat correctament');
+        res.json(producte);
     });
 });
 
@@ -86,21 +85,23 @@ app.put('/putProducte/:id', (req, res) => {
 // Afegir Producte JSON
 app.post('/postProducte', (req, res) => {
     const newProduct = req.body;
-    let productes = json.productes; 
+    let productes = json.productes;
 
     const newIndex = productes.length + 1;
     newProduct.idProducte = newIndex;
     productes.push(newProduct);
 
     json.productes = productes;
+    console.log("array productes", productes);
 
     fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
         if (err) {
             console.error('Error escrivint el fitxer JSON', err);
             return res.status(500).send('Error afegint el producte');
         }
-        res.send('Producte afegit correctament');
+        res.json({ message: 'Producte afegit correctament!', product: newProduct })
     });
+
 });
 
 // Crear connexió de Base de Dades

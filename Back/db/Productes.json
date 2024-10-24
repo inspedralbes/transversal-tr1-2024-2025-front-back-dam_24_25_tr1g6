@@ -1,36 +1,58 @@
 {
-    "productes": [
-        {
-            "nomProducte": "Orange Juice",
-            "Descripcio": "Freshly squeezed orange juice",
-            "Preu": 3.50,
-            "Stock": 0,
-            "Activat": 0,
-            "Imatge": "http://localhost:3001/assets/orange-juice.jpg"
-        },
-        {
-            "nomProducte": "Apple Juice",
-            "Descripcio": "100% pure apple juice",
-            "Preu": 2.75,
-            "Stock": 150,
-            "Activat": 1,
-            "Imatge": "http://localhost:3001/assets/apple-juice.jpg"
-        },
-        {
-            "nomProducte": "Grape Juice",
-            "Descripcio": "Organic grape juice",
-            "Preu": 4.00,
-            "Stock": 80,
-            "Activat": 1,
-            "Imatge": "http://localhost:3001/assets/grape-juice.jpg"
-        },
-        {
-            "nomProducte": "Pineapple Juice",
-            "Descripcio": "Tropical pineapple juice",
-            "Preu": 3.25,
-            "Stock": 120,
-            "Activat": 1,
-            "Imatge": "http://localhost:3001/assets/pineapple-juice.jpg"
-        }
-    ]
+  "productes": [
+    {
+      "nomProducte": "grape juice",
+      "Descripcio": "Organic grape juice",
+      "Preu": "3.7",
+      "Stock": 80,
+      "Activat": 1,
+      "Imatge": "http://prejuicengo.dam.inspedralbes.cat:20869/assets/grape-juice.jpg",
+      "idProducte": 3
+    },
+    {
+      "nomProducte": "strawberry juice",
+      "Descripcio": "strawberry juice",
+      "Preu": 3.5,
+      "Stock": 30,
+      "Activat": 1,
+      "Imatge": "http://prejuicengo.dam.inspedralbes.cat:20869/assets/strawberry-juice.jpg",
+      "idProducte": 5
+    },
+    {
+      "nomProducte": "coco juice",
+      "Descripcio": "coco juice",
+      "Preu": "3.60",
+      "Stock": "489",
+      "Activat": true,
+      "Imatge": "",
+      "idProducte": 6
+    },
+    {
+      "nomProducte": "kdjakdna",
+      "Descripcio": "kdnakda",
+      "Preu": "4.7",
+      "Stock": "20",
+      "Activat": 0,
+      "Imatge": "",
+      "idProducte": 8
+    },
+    {
+      "nomProducte": "pruelkmlafj",
+      "Descripcio": "jnfkjnfhsf",
+      "Preu": "6.7",
+      "Stock": "5467890",
+      "Activat": 0,
+      "Imatge": "",
+      "idProducte": 9
+    },
+    {
+      "nomProducte": "prueba4",
+      "Descripcio": "prueba4",
+      "Preu": "2.6",
+      "Stock": "5267890",
+      "Activat": 0,
+      "Imatge": "",
+      "idProducte": 7
+    }
+  ]
 }

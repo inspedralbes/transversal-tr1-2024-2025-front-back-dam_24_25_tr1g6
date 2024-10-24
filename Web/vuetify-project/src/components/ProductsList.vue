@@ -2,12 +2,13 @@
   <v-container>
     <v-row align="center" justify="space-between">
       <v-col cols="4">
-        <h2>Lista de Productos</h2>
+        <h2>Llista de Productes</h2>
       </v-col>
       <v-col cols="4" class="text-center">
         <v-btn
           prepend-icon="mdi-plus"
           variant="outlined"
+          class="btn-afegir-producte"
           @click="toggleAddProductForm"
         >
           Afegir Producte
@@ -15,61 +16,86 @@
       </v-col>
       <v-col cols="4" class="text-right">
         <v-text-field
+          :loading="loading"
           v-model="search"
-          label="Buscar Producte"
-          clearable
+          append-inner-icon="mdi-magnify"
+          density="compact"
+          label="Search templates"
+          variant="solo"
+          hide-details
+          single-line
         ></v-text-field>
       </v-col>
     </v-row>
 
     <v-row v-if="showAddProductForm" justify="center">
       <v-col cols="12" md="8" lg="6">
-        <v-card>
-          <v-card-title>Afegir Nou Producte</v-card-title>
+        <v-card class="add-product-card">
+          <v-card-title class="headline">Afegir Nou Producte</v-card-title>
           <v-card-text>
             <v-form @submit.prevent="callAddProduct">
-              <v-text-field
-                v-model="addProduct.nomProducte"
-                label="Nom Producte"
-                dense
-                required
-              ></v-text-field>
-              <v-text-field
-                v-model="addProduct.Descripcio"
-                label="Descripcio"
-                dense
-                required
-              ></v-text-field>
-              <v-text-field
-                v-model="addProduct.Preu"
-                label="Preu"
-                type="number"
-                dense
-                required
-              ></v-text-field>
-              <v-text-field
-                v-model="addProduct.Stock"
-                label="Stock"
-                type="number"
-                dense
-                required
-              ></v-text-field>
-              <v-text-field
-                v-model="addProduct.Imatge"
-                label="Imatge URL"
-                dense
-                required
-              ></v-text-field>
-              <v-checkbox
-                v-model="addProduct.Activat"
-                label="Activat"
-              ></v-checkbox>
-              <v-btn
-                @click="toggleAddProductForm()"
-                type="submit"
-                color="primary"
-                >Afegir</v-btn
-              >
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="addProduct.nomProducte"
+                    label="Nom Producte"
+                    prepend-icon="mdi-tag"
+                    dense
+                    outlined
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="addProduct.Descripcio"
+                    label="Descripcio"
+                    prepend-icon="mdi-text"
+                    dense
+                    outlined
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="addProduct.Preu"
+                    label="Preu"
+                    prepend-icon="mdi-currency-usd"
+                    type="number"
+                    dense
+                    outlined
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="addProduct.Stock"
+                    label="Stock"
+                    prepend-icon="mdi-package-variant"
+                    type="number"
+                    dense
+                    outlined
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="addProduct.Imatge"
+                    label="Imatge URL"
+                    prepend-icon="mdi-image"
+                    dense
+                    outlined
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-checkbox
+                    v-model="addProduct.Activat"
+                    label="Activat"
+                    dense
+                  ></v-checkbox>
+                </v-col>
+              </v-row>
+              <v-btn type="submit" class="btn-afegir-producte">Afegir</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -82,37 +108,148 @@
           <v-list-item
             v-for="product in filteredProductes"
             :key="product.nomProducte"
+            class="product-list-item"
           >
-            <v-list-item-content>
-              <v-list-item-title>
-                <span v-if="product.Stock > 0" class="stock-disponible"
-                  >Stock disponible {{ product.Stock }}</span
-                >
-                <span v-else class="stock-no-disponible">Sin stock</span>
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                <span v-if="product.Activat === 1" class="activated"
-                  >Activado</span
-                >
-                <span v-else class="blocked">Desactivado</span>
-              </v-list-item-subtitle>
-              <v-list-item-subtitle
-                >Nom: {{ product.nomProducte }}</v-list-item-subtitle
-              >
-              <v-list-item-subtitle
-                >Descripcio: {{ product.Descripcio }}</v-list-item-subtitle
-              >
-              <v-list-item-subtitle
-                >Preu: ${{ product.Preu }}</v-list-item-subtitle
-              >
-            </v-list-item-content>
-            <v-list-item-avatar>
-              <v-img :src="product.Imatge" height="50" width="50"></v-img>
-            </v-list-item-avatar>
-            <v-list-item-action>
-              <v-btn @click="editar(product)">Editar</v-btn>
-              <v-btn @click="eliminar(product)">Eliminar</v-btn>
-            </v-list-item-action>
+            <v-row align="center">
+              <v-col cols="1">
+                <v-list-item-avatar>
+                  <v-img
+                    :src="product.Imatge"
+                    height="50"
+                    width="50"
+                    rounded="lg"
+                  ></v-img>
+                </v-list-item-avatar>
+              </v-col>
+              <v-col cols="2">
+                <v-list-item-title>
+                  <span v-if="product.Stock > 0" class="stock-disponible"
+                    >Stock disponible {{ product.Stock }}</span
+                  >
+                  <span v-else class="stock-no-disponible">Sin stock</span>
+                </v-list-item-title>
+              </v-col>
+              <v-col cols="2">
+                <v-list-item-subtitle>
+                  <span v-if="product.Activat === 1" class="activated"
+                    >Activado</span
+                  >
+                  <span v-else class="blocked">Desactivado</span>
+                </v-list-item-subtitle>
+              </v-col>
+              <v-col cols="2">
+                <v-list-item-subtitle>
+                  {{ product.nomProducte }}
+                </v-list-item-subtitle>
+              </v-col>
+              <v-col cols="3">
+                <v-list-item-subtitle>
+                  {{ product.Descripcio }}
+                </v-list-item-subtitle>
+              </v-col>
+              <v-col cols="1">
+                <v-list-item-subtitle>
+                  {{ product.Preu }} €
+                </v-list-item-subtitle>
+              </v-col>
+              <v-col cols="1">
+                <v-list-item-action>
+                  <v-btn @click="editar(product)" icon color="primary">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn
+                    @click="callDeleteProduct(product.idProducte)"
+                    icon
+                    color="red"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-col>
+            </v-row>
+            <v-row
+              v-if="
+                editingProduct &&
+                editingProduct.idProducte === product.idProducte
+              "
+            >
+              <v-col cols="12">
+                <v-card class="edit-product-card">
+                  <v-card-title class="headline">Editar Producte</v-card-title>
+                  <v-card-text>
+                    <v-form @submit.prevent="callEditProduct">
+                      <v-row>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.nomProducte"
+                            label="Nom Producte"
+                            prepend-icon="mdi-tag"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Descripcio"
+                            label="Descripcio"
+                            prepend-icon="mdi-text"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Preu"
+                            label="Preu"
+                            prepend-icon="mdi-currency-usd"
+                            type="number"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Stock"
+                            label="Stock"
+                            prepend-icon="mdi-package-variant"
+                            type="number"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="editingProduct.Imatge"
+                            label="Imatge URL"
+                            prepend-icon="mdi-image"
+                            dense
+                            outlined
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-checkbox
+                            v-model="editingProduct.Activat"
+                            label="Activat"
+                            dense
+                          ></v-checkbox>
+                        </v-col>
+                      </v-row>
+                      <v-btn type="submit" color="primary" class="mt-4"
+                        >Guardar</v-btn
+                      >
+                      <v-btn @click="cancelEdit" color="secondary" class="mt-4"
+                        >Cancelar</v-btn
+                      >
+                    </v-form>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-list-item>
         </v-list>
       </v-col>
@@ -140,6 +277,8 @@ const addProduct = ref({
   Activat: 0,
   Imatge: "",
 });
+const editingProduct = ref(null);
+const loading = ref(false); // Definir la propiedad loading
 
 const toggleAddProductForm = () => {
   showAddProductForm.value = !showAddProductForm.value;
@@ -147,8 +286,10 @@ const toggleAddProductForm = () => {
 
 const callAddProduct = async () => {
   try {
+    loading.value = true; // Iniciar el estado de carga
     const nouProduct = await crearProductes(addProduct.value);
-    productes.value.push(nouProduct);
+    if (nouProduct && nouProduct.idProducte) {
+    }
     addProduct.value = {
       nomProducte: "",
       Descripcio: "",
@@ -160,7 +301,49 @@ const callAddProduct = async () => {
     showAddProductForm.value = false;
   } catch (error) {
     console.error("Error adding product:", error);
+  } finally {
+    productes.value = await getProductes();
+    loading.value = false; // Finalizar el estado de carga
   }
+};
+
+const callEditProduct = async () => {
+  try {
+    const updatedProduct = await modificarProducte(editingProduct.value);
+    if (!updatedProduct || !updatedProduct.idProducte) {
+      throw new Error("Error updating product");
+    }
+
+    const index = productes.value.findIndex(
+      (p) => p.idProducte === updatedProduct.idProducte
+    );
+
+    if (index !== -1) {
+      productes.value[index] = updatedProduct;
+    }
+    editingProduct.value = null;
+  } catch (error) {
+    console.error("Error updating product:", error);
+  }
+};
+
+const callDeleteProduct = async (idProducte) => {
+  try {
+    await eliminarProducte(idProducte);
+    productes.value = productes.value.filter(
+      (p) => p.idProducte !== idProducte
+    );
+  } catch (error) {
+    console.error("Error deleting product:", error);
+  }
+};
+
+const cancelEdit = () => {
+  editingProduct.value = null;
+};
+
+const editar = (product) => {
+  editingProduct.value = { ...product };
 };
 
 const filteredProductes = computed(() => {
@@ -170,7 +353,6 @@ const filteredProductes = computed(() => {
       product.nomProducte.toLowerCase().includes(search.value.toLowerCase())
     );
 
-  console.log("Prpductos filtrados: ", filtered);
   return filtered;
 });
 
@@ -187,23 +369,74 @@ onMounted(async () => {
   }
 });
 </script>
-
 <style scoped>
 .v-card {
   margin-bottom: 20px;
 }
 
+.add-product-card {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-product-card {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.headline {
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
 .activated {
-  border: 1px solid green;
   background-color: lightgreen;
   padding: 5px;
-  border-radius: 5px;
+  border-radius: 10px;
 }
 
 .blocked {
-  border: 1px solid red;
   background-color: lightcoral;
   padding: 5px;
-  border-radius: 5px;
+  border-radius: 10px;
+}
+
+.btn-afegir-producte {
+  background-color: lightseagreen;
+}
+
+.stock-disponible {
+  color: green;
+}
+
+.stock-no-disponible {
+  color: red;
+}
+
+.product-list-item {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 0;
+}
+
+.v-list-item-avatar {
+  margin-right: 10px;
+}
+
+.v-list-item-title,
+.v-list-item-subtitle {
+  margin: 0;
+}
+
+.v-list-item-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.v-btn {
+  margin-left: 5px;
 }
 </style>
