@@ -77,14 +77,11 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model="addProduct.Imatge"
-                    label="Imatge URL"
-                    prepend-icon="mdi-image"
-                    dense
-                    outlined
-                    required
-                  ></v-text-field>
+                  <v-file-input
+                    label="File input w/ chips"
+                    chips
+                    accept="image/*"
+                  ></v-file-input>
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-checkbox
