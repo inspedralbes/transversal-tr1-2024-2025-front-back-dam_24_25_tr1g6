@@ -147,17 +147,17 @@
               </v-col>
               <v-col cols="2">
                 <v-list-item-subtitle>
-                  Nom: {{ product.nomProducte }}
+                  {{ product.nomProducte }}
                 </v-list-item-subtitle>
               </v-col>
               <v-col cols="3">
                 <v-list-item-subtitle>
-                  Descripcio: {{ product.Descripcio }}
+                  {{ product.Descripcio }}
                 </v-list-item-subtitle>
               </v-col>
               <v-col cols="1">
                 <v-list-item-subtitle>
-                  Preu: ${{ product.Preu }}
+                  {{ product.Preu }} €
                 </v-list-item-subtitle>
               </v-col>
               <v-col cols="1">
@@ -346,10 +346,13 @@ const callEditProduct = async () => {
 
 const callDeleteProduct = async (idProducte) => {
   try {
-    await eliminarProducte(idProducte);
-    productes.value = productes.value.filter(
-      (p) => p.idProducte !== idProducte
-    );
+    const response = await eliminarProducte(idProducte);
+    console.log("vue response", idProducte, response);
+    if (response && response.idProducte) {
+      productes.value = productes.value.filter(
+        (p) => p.idProducte !== response.idProducte
+      );
+    }
   } catch (error) {
     console.error("Error deleting product:", error);
   }

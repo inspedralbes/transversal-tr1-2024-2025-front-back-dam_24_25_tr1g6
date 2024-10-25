@@ -6,6 +6,7 @@ const mysql = require('mysql2/promise');
 const PORT = 3001;
 const path = require('path');
 const cors = require('cors');
+const { error } = require('console');
 app.use(express.json());
 app.use(cors());
 
@@ -161,14 +162,14 @@ app.get('/getProductesBD', (req, res) => {
 
 // Post Producte Base de Dades
 app.post('/postProducteBD', async (req, res) => {
-    const { nomProducte, Descripcio, Preu, Stock, Imatge } = req.body;
+    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
 
     const connection = await createConnection();
 
     return connection.execute(
-        `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge) 
-        VALUES (?, ?, ?, ?, ?)`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge]
+        `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat]
     )
         .then(([result]) => {
             const productId = result.insertId;
@@ -206,13 +207,13 @@ app.put('/putProducteBD/:id', async (req, res) => {
         WHERE idProducte = ?`,
         [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
     )
-        .then(([resultats]) => {
-            const producte = resultats[0];
+        .then(() => {
             res.json({
                 message: 'Producte actualitzat correctament',
-                producte: { producte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: producte.Preu, Stock: producte.Stock, Activat: producte.Activat, Imatge: producte.Imatge }
+                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
             });
-            console.log("Producte actualitzat: ", producte);
+            console.log("Producte actualitzat: ", res.json);
+
 
         })
         .finally(() => {
@@ -222,19 +223,33 @@ app.put('/putProducteBD/:id', async (req, res) => {
 
 // Delete Producte Base de Dades
 app.delete('/deleteProducteBD/:id', async (req, res) => {
-    const idProducte = parseInt(req.params.id);
+    const idProducte = req.params.id;
+    console.log("idProducte", idProducte);
 
     const connection = await createConnection();
 
-    return connection.execute(`DELETE FROM producte WHERE idProducte = ?`, idProducte)
-        .then(() => {
-            res.json({
-                message: 'Producte eliminat correctament'
-            });
-        })
-        .finally(() => {
-            connection.end();
+    try {
+        const [rows] = await connection.execute(`SELECT * FROM producte WHERE idProducte = ?`, [idProducte]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Producte no trobat' });
+        }
+
+        await connection.execute(`DELETE FROM producte WHERE idProducte = ?`, [idProducte]);
+
+        res.json({
+            message: 'Producte eliminat correctament',
+            idProducte: idProducte
         });
+
+    } catch (error) {
+        console.error("Error eliminant producte: ", error);
+        res.status(500).json({
+            error: 'Error eliminant producte',
+            details: error.details
+        })
+    } finally {
+        connection.end();
+    }
 });
 
 // Iniciar el servidor
