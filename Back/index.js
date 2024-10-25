@@ -3,14 +3,33 @@ const express = require('express');
 const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
-const PORT = 3001;
 const path = require('path');
+const multer = require('multer');
 const cors = require('cors');
+require('dotenv').config(); // Permet llegir variables d'entorn des d'un fitxer .env
 const { error } = require('console');
 app.use(express.json());
 app.use(cors());
 
+const PORT = process.env.PORT || 3001;
+const urlProd = process.env.BACK_URL_PROD || 'http://juicengo.dam.inspedralbes.cat';
+const urlPreProd = process.env.BACK_URL_PREPROD || 'http://prejuicengo.dam.inspedralbes.cat';
+
 let json;
+
+
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, `${process.env.BACK_ROUTE_IMAGES}`));
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
     if (err) {
@@ -161,36 +180,48 @@ app.get('/getProductesBD', (req, res) => {
 });
 
 // Post Producte Base de Dades
-app.post('/postProducteBD', async (req, res) => {
-    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
+app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
+    const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
+    const file = req.file ? req.file.filename : null;
 
-    const connection = await createConnection();
+    if (!file) {
+        return res.status(400).send('Imatge no pujada');
+    }
 
-    return connection.execute(
-        `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
-        VALUES (?, ?, ?, ?, ?, ?)`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat]
-    )
-        .then(([result]) => {
-            const productId = result.insertId;
-            return connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
-        })
-        .then(([resultats]) => {
-            const producte = resultats[0];
-            res.json({
-                message: 'Producte afegit correctament',
-                producte: { idProducte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: parseFloat(producte.Preu), Stock: producte.Stock, Imatge: producte.Imatge, Activat: producte.Activat }
-            });
-            console.log("Producte afegit: ", producte);
+    const imageUrl = `${process.env.BACK_URL_LOCAL}/assets/${file}`;
 
-        })
-        .catch(error => {
-            console.error('Error afegint producte:', error);
-            res.status(500).send('Error afegint producte');
-        })
-        .finally(() => {
-            connection.end();
+    try {
+        const connection = await createConnection();
+
+        const [result] = await connection.execute(
+            `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [nomProducte, Descripcio, Preu, Stock, imageUrl, Activat]
+        );
+
+        const productId = result.insertId;
+
+        const [resultats] = await connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
+
+        const producte = resultats[0];
+        res.json({
+            message: 'Producte afegit correctament',
+            producte: {
+                idProducte: producte.idProducte,
+                nomProducte: producte.nomProducte,
+                Descripcio: producte.Descripcio,
+                Preu: parseFloat(producte.Preu),
+                Stock: producte.Stock,
+                Imatge: producte.Imatge,  // Aquí devolverás la URL de la imagen
+                Activat: producte.Activat
+            }
         });
+        console.log("Producte afegit: ", producte);
+
+    } catch (error) {
+        console.error('Error afegint producte:', error);
+        res.status(500).send('Error afegint producte');
+    }
 });
 
 // Update Producte Base de Dades

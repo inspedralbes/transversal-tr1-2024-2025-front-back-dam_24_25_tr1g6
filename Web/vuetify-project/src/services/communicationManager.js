@@ -9,16 +9,13 @@ export async function getProductes() {
     return data;
 }
 
-export async function crearProductes(producte) {
+export async function crearProductes(producteFormData) {
     console.log("communication ", producte);
     try {
         const response = await fetch(`${import.meta.env.VITE_URL_BACK}/postProducteBD`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
 
-            },
-            body: JSON.stringify(producte)
+            body: producteFormData
         });
 
         if (!response.ok) {

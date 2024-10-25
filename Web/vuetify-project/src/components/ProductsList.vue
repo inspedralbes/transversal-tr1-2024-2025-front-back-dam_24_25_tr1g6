@@ -81,6 +81,7 @@
                     label="File input w/ chips"
                     chips
                     accept="image/*"
+                    required
                   ></v-file-input>
                 </v-col>
                 <v-col cols="12" md="6">
@@ -301,7 +302,21 @@ const toggleAddProductForm = () => {
 const callAddProduct = async () => {
   try {
     loading.value = true;
-    const nouProduct = await crearProductes(addProduct.value);
+
+    const formData = new FormData();
+    formData.append("nomProducte", addProduct.value.nomProducte);
+    formData.append("Descripcio", addProduct.value.Descripcio);
+    formData.append("Preu", addProduct.value.Preu);
+    formData.append("Stock", addProduct.value.Stock);
+    formData.append("Activat", addProduct.value.Activat);
+
+    // Verifica que se está seleccionando y enviando correctamente la imagen
+    if (addProduct.value.Imatge) {
+      formData.append("Imatge", addProduct.value.Imatge); // Este nombre debe coincidir con el backend
+    }
+
+    const nouProduct = await crearProductes(formData);
+
     if (nouProduct && nouProduct.producte) {
       productes.value.push(nouProduct.producte);
     }
@@ -311,7 +326,7 @@ const callAddProduct = async () => {
       Preu: 0,
       Stock: 0,
       Activat: 0,
-      Imatge: "",
+      Imatge: null,
     };
     showAddProductForm.value = false;
   } catch (error) {
