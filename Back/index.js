@@ -165,11 +165,20 @@ app.post('/postProducteBD', async (req, res) => {
         VALUES (?, ?, ?, ?, ?)`,
         [nomProducte, Descripcio, Preu, Stock, Imatge]
     )
-        .then(() => {
+        .then(([result]) => {
+            const productId = result.insertId;
+            return connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
+        })
+        .then(([resultats]) => {
+            const producte = resultats[0];
             res.json({
                 message: 'Producte afegit correctament',
-                producte: { nomProducte, Descripcio, Preu, Stock, Imatge }
+                producte: { idProducte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: parseFloat(producte.Preu), Stock: producte.Stock, Imatge: producte.Imatge, Activat: producte.Activat }
             });
+        })
+        .catch(error => {
+            console.error('Error afegint producte:', error);
+            res.status(500).send('Error afegint producte');
         })
         .finally(() => {
             connection.end();
@@ -180,20 +189,20 @@ app.post('/postProducteBD', async (req, res) => {
 app.put('/putProducteBD/:id', async (req, res) => {
     const idProducte = parseInt(req.params.id);
 
-    const { nomProducte, Descripcio, Preu, Stock, Imatge } = req.body;
+    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
 
     const connection = await createConnection();
 
     return connection.execute(
         `UPDATE producte 
-        SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ? 
+        SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ?, Activat = ? 
         WHERE idProducte = ?`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge, idProducte]
+        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
     )
         .then(() => {
             res.json({
                 message: 'Producte actualitzat correctament',
-                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Imatge }
+                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
             });
         })
         .finally(() => {

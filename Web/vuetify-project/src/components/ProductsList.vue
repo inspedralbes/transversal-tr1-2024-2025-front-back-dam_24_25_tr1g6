@@ -288,7 +288,8 @@ const callAddProduct = async () => {
   try {
     loading.value = true; // Iniciar el estado de carga
     const nouProduct = await crearProductes(addProduct.value);
-    if (nouProduct && nouProduct.idProducte) {
+    if (nouProduct && nouProduct.producte) {
+      productes.value.push(nouProduct.producte);
     }
     addProduct.value = {
       nomProducte: "",
@@ -302,7 +303,6 @@ const callAddProduct = async () => {
   } catch (error) {
     console.error("Error adding product:", error);
   } finally {
-    productes.value = await getProductes();
     loading.value = false; // Finalizar el estado de carga
   }
 };
@@ -347,20 +347,22 @@ const editar = (product) => {
 };
 
 const filteredProductes = computed(() => {
-  const filtered = productes.value
-    .filter((product) => product && product.nomProducte)
-    .filter((product) =>
-      product.nomProducte.toLowerCase().includes(search.value.toLowerCase())
-    );
-
-  return filtered;
+  if (Array.isArray(productes.value)) {
+    return productes.value
+      .filter((product) => product && product.nomProducte)
+      .filter((product) =>
+        product.nomProducte.toLowerCase().includes(search.value.toLowerCase())
+      );
+  } else {
+    return [];
+  }
 });
 
 onMounted(async () => {
   try {
     const response = await getProductes();
-    if (Array.isArray(response)) {
-      productes.value = response;
+    if (Array.isArray(response.productes)) {
+      productes.value = response.productes;
     } else {
       console.error("El JSON de productos no es un array");
     }
