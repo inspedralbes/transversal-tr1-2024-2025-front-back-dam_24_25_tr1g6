@@ -8,7 +8,6 @@
         <v-btn
           prepend-icon="mdi-plus"
           variant="outlined"
-          class="btn-afegir-producte"
           @click="toggleAddProductForm"
         >
           Afegir Producte
@@ -90,12 +89,21 @@
                 <v-col cols="12" md="6">
                   <v-checkbox
                     v-model="addProduct.Activat"
-                    label="Activat"
+                    :value="1"
+                    label="Activar"
                     dense
+                    @change="addProduct.Activat = 1"
+                  ></v-checkbox>
+                  <v-checkbox
+                    v-model="addProduct.Activat"
+                    :value="0"
+                    label="Desactivar"
+                    dense
+                    @change="addProduct.Activat = 0"
                   ></v-checkbox>
                 </v-col>
               </v-row>
-              <v-btn type="submit" class="btn-afegir-producte">Afegir</v-btn>
+              <v-btn type="submit" color="primary" class="mt-4">Afegir</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -139,17 +147,17 @@
               </v-col>
               <v-col cols="2">
                 <v-list-item-subtitle>
-                  {{ product.nomProducte }}
+                  Nom: {{ product.nomProducte }}
                 </v-list-item-subtitle>
               </v-col>
               <v-col cols="3">
                 <v-list-item-subtitle>
-                  {{ product.Descripcio }}
+                  Descripcio: {{ product.Descripcio }}
                 </v-list-item-subtitle>
               </v-col>
               <v-col cols="1">
                 <v-list-item-subtitle>
-                  {{ product.Preu }} €
+                  Preu: ${{ product.Preu }}
                 </v-list-item-subtitle>
               </v-col>
               <v-col cols="1">
@@ -234,8 +242,17 @@
                         <v-col cols="12" md="6">
                           <v-checkbox
                             v-model="editingProduct.Activat"
-                            label="Activat"
+                            :value="1"
+                            label="Activar"
                             dense
+                            @change="editingProduct.Activat = 1"
+                          ></v-checkbox>
+                          <v-checkbox
+                            v-model="editingProduct.Activat"
+                            :value="0"
+                            label="Desactivar"
+                            dense
+                            @change="editingProduct.Activat = 0"
                           ></v-checkbox>
                         </v-col>
                       </v-row>
@@ -278,7 +295,7 @@ const addProduct = ref({
   Imatge: "",
 });
 const editingProduct = ref(null);
-const loading = ref(false); // Definir la propiedad loading
+const loading = ref(false);
 
 const toggleAddProductForm = () => {
   showAddProductForm.value = !showAddProductForm.value;
@@ -286,7 +303,7 @@ const toggleAddProductForm = () => {
 
 const callAddProduct = async () => {
   try {
-    loading.value = true; // Iniciar el estado de carga
+    loading.value = true;
     const nouProduct = await crearProductes(addProduct.value);
     if (nouProduct && nouProduct.producte) {
       productes.value.push(nouProduct.producte);
@@ -303,7 +320,7 @@ const callAddProduct = async () => {
   } catch (error) {
     console.error("Error adding product:", error);
   } finally {
-    loading.value = false; // Finalizar el estado de carga
+    loading.value = false;
   }
 };
 
@@ -371,6 +388,7 @@ onMounted(async () => {
   }
 });
 </script>
+
 <style scoped>
 .v-card {
   margin-bottom: 20px;
@@ -405,10 +423,6 @@ onMounted(async () => {
   background-color: lightcoral;
   padding: 5px;
   border-radius: 10px;
-}
-
-.btn-afegir-producte {
-  background-color: lightseagreen;
 }
 
 .stock-disponible {

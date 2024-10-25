@@ -107,10 +107,15 @@ app.post('/postProducte', (req, res) => {
 // Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
-        host: 'dam.inspedralbes.cat',
-        user: 'a21rublormar_admin',
-        password: 'InsPedralbes2024',
-        database: 'a21rublormar_TR1_GR6'
+        // host: 'dam.inspedralbes.cat',
+        // user: 'a21rublormar_admin',
+        // password: 'InsPedralbes2024',
+        // database: 'a21rublormar_TR1_GR6'
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'a21rublormar_TR1_GR6',
+        port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -175,6 +180,8 @@ app.post('/postProducteBD', async (req, res) => {
                 message: 'Producte afegit correctament',
                 producte: { idProducte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: parseFloat(producte.Preu), Stock: producte.Stock, Imatge: producte.Imatge, Activat: producte.Activat }
             });
+            console.log("Producte afegit: ", producte);
+
         })
         .catch(error => {
             console.error('Error afegint producte:', error);
@@ -199,11 +206,14 @@ app.put('/putProducteBD/:id', async (req, res) => {
         WHERE idProducte = ?`,
         [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
     )
-        .then(() => {
+        .then(([resultats]) => {
+            const producte = resultats[0];
             res.json({
                 message: 'Producte actualitzat correctament',
-                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
+                producte: { producte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: producte.Preu, Stock: producte.Stock, Activat: producte.Activat, Imatge: producte.Imatge }
             });
+            console.log("Producte actualitzat: ", producte);
+
         })
         .finally(() => {
             connection.end();
