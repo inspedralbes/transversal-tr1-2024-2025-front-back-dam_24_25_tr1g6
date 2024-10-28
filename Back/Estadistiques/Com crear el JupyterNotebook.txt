@@ -1,0 +1,28 @@
+Primer instal·lar pip i python
+
+- python3 -m pip install --upgrade pip
+
+Creació del entorno 
+
+- python3 -m venv (nom_projecte)
+
+Entrem a l'entorn
+
+- (nom_projecte)\Scripts\activate
+
+Install IPYKernel and
+
+(primer desde el pip)
+- pip install ipykernel
+
+(despres al projecte)
+- python -m ipykernel install --name (nomProjecte)
+
+Install Jupyter
+
+- pip install jupyter
+
+Inicialitzar Jupyter
+
+- jupyter notebook
+
