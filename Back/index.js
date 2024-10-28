@@ -5,6 +5,10 @@ const fs = require('fs')
 const mysql = require('mysql2/promise');
 const PORT = 3001;
 const path = require('path');
+const { createServer } = require('node:http');
+const { Server } = require('socket.io');
+const server = createServer(app);
+const io = new Server(server);
 const cors = require('cors');
 const { error } = require('console');
 app.use(express.json());
@@ -22,7 +26,12 @@ fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+      console.log('user disconnected');
+    });
+});
 
 // Llegir el fitxer JSON amb els productes
 app.get('/getProductes', (req, res) => {
@@ -177,6 +186,15 @@ app.post('/postProducteBD', async (req, res) => {
         })
         .then(([resultats]) => {
             const producte = resultats[0];
+            const newProduct = {
+                "nomProducte": nomProducte,
+                "Descripcio": Descripcio,
+                "Preu": Preu,
+                "Stock": Stock,
+                "Imatge": Imatge,
+                "Activat": Activat
+            }
+            io.emit("new-product", newProduct)
             res.json({
                 message: 'Producte afegit correctament',
                 producte: { idProducte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: parseFloat(producte.Preu), Stock: producte.Stock, Imatge: producte.Imatge, Activat: producte.Activat }
