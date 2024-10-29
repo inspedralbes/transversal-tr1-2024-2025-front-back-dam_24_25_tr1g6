@@ -3,9 +3,12 @@ const express = require('express');
 const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
-const PORT = 3001;
-// const PORT = 20869;
+const PORT = 3010;
 const path = require('path');
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
 const cors = require('cors');
 const { error } = require('console');
 app.use(express.json());
@@ -13,17 +16,24 @@ app.use(cors());
 
 let json;
 
-fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
-    if (err) {
-        console.error('Error leyendo el JSON');
-        return;
-    }
-    json = JSON.parse(data);
-})
+// fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
+//     if (err) {
+//         console.error('Error leyendo el JSON');
+//         return;
+//     }
+//     json = JSON.parse(data);
+// })
+
+app.use(express.static('public'));
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+});
 
 // Llegir el fitxer JSON amb els productes
 app.get('/getProductes', (req, res) => {
@@ -138,7 +148,6 @@ app.get('/getProductesBD', (req, res) => {
                     return connection.query('SELECT * FROM producte');
                 })
                 .then(([resultats]) => {
-                    const baseUrl = 'http://localhost:3001';
                     const response = {
                         productes: resultats.map(producte => ({
                             idProducte: producte.idProducte,
@@ -146,7 +155,7 @@ app.get('/getProductesBD', (req, res) => {
                             Descripcio: producte.Descripcio,
                             Preu: parseFloat(producte.Preu),
                             Stock: producte.Stock,
-                            Imatge: `${baseUrl}/assets/${producte.Imatge}`,
+                            Imatge: producte.Imatge,
                             Activat: producte.Activat
                         }))
                     };
@@ -175,6 +184,16 @@ app.post('/postProducteBD', async (req, res) => {
     )
         .then(([result]) => {
             const productId = result.insertId;
+            const newProduct = {
+                "idProduct": productId,
+                "nomProducte": nomProducte,
+                "Descripcio": Descripcio,
+                "Preu": Preu,
+                "Stock": Stock,
+                "Imatge": Imatge,
+                "Activat": Activat
+            }
+            io.emit("new-product", newProduct)
             return connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
         })
         .then(([resultats]) => {
@@ -210,13 +229,21 @@ app.put('/putProducteBD/:id', async (req, res) => {
         [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
     )
         .then(() => {
+            const updateProduct = {
+                "idProducte": idProducte,
+                "nomProducte": nomProducte,
+                "Descripcio": Descripcio,
+                "Preu": Preu,
+                "Stock": Stock,
+                "Imatge": Imatge,
+                "Activat": Activat
+            }
+            io.emit("update-product", updateProduct)
             res.json({
                 message: 'Producte actualitzat correctament',
                 producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
             });
             console.log("Producte actualitzat: ", res.json);
-
-
         })
         .finally(() => {
             connection.end();
@@ -238,6 +265,8 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
 
         await connection.execute(`DELETE FROM producte WHERE idProducte = ?`, [idProducte]);
 
+        io.emit('delete-product', idProducte)
+
         res.json({
             message: 'Producte eliminat correctament',
             idProducte: idProducte
@@ -255,6 +284,6 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
 });
 
 // Iniciar el servidor
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });
