@@ -160,6 +160,38 @@ app.get('/getProductesBD', (req, res) => {
         });
 });
 
+// Get Comandes Base de Dades
+app.get('/getComandesBD', (req, res) => {
+    console.log("hola");
+    createConnection()
+        .then(connection => {
+            return connection.connect()
+                .then(() => {
+                    return connection.query('SELECT * FROM comandes');
+                })
+                .then(([resultats]) => {
+                    const response = {
+                        comandes: resultats.map(comandes => ({
+                            idComanda: comandes.idComanda,
+                            idUsuari: comandes.idUsuari,
+                            Productes: comandes.Productes,
+                            PreuTotal: parseFloat(comandes.PreuTotal),
+                            Estat: comandes.Estat,
+                            data: new Date(comandes.data).toISOString()
+                        }))
+                    };
+                    res.json(response);
+                })
+                .finally(() => {
+                    connection.end();
+                });
+        })
+        .catch(error => {
+            console.error('Error fetching orders:', error);
+            res.status(500).send('Error fetching orders');
+        });
+});
+
 // Post Producte Base de Dades
 app.post('/postProducteBD', async (req, res) => {
     const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;

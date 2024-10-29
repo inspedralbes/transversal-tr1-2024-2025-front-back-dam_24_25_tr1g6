@@ -9,6 +9,17 @@ export async function getProductes() {
     return data;
 }
 
+export async function getComandes() {
+    const response = await fetch(`${import.meta.env.VITE_URL_BACK}/getComandesBD`);
+    if (!response.ok) {
+        throw new Error('Error al obtenir les dades de les comandes');
+    }
+
+    const data = await response.json();
+    
+    return data;
+}
+
 export async function crearProductes(producte) {
     console.log("communication ", producte);
     try {
