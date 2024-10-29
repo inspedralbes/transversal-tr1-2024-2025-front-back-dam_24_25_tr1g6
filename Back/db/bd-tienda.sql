@@ -98,7 +98,7 @@ VALUES (
         3.50,
         100,
         1,
-        'http://example.com/orange_juice.jpg',
+        'orange_juice.jpg',
         NULL
     ),
     (
@@ -108,7 +108,7 @@ VALUES (
         2.75,
         150,
         1,
-        'http://example.com/apple_juice.jpg',
+        'apple_juice.jpg',
         NULL
     ),
     (
@@ -118,7 +118,7 @@ VALUES (
         4.00,
         80,
         1,
-        'http://example.com/grape_juice.jpg',
+        'grape_juice.jpg',
         NULL
     ),
     (
@@ -128,7 +128,7 @@ VALUES (
         3.25,
         120,
         1,
-        'http://example.com/pineapple_juice.jpg',
+        'pineapple_juice.jpg',
         NULL
     ),
     (

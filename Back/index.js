@@ -4,6 +4,7 @@ const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
 const PORT = 3001;
+// const PORT = 20869;
 const path = require('path');
 const cors = require('cors');
 const { error } = require('console');
@@ -137,6 +138,7 @@ app.get('/getProductesBD', (req, res) => {
                     return connection.query('SELECT * FROM producte');
                 })
                 .then(([resultats]) => {
+                    const baseUrl = 'http://localhost:3001';
                     const response = {
                         productes: resultats.map(producte => ({
                             idProducte: producte.idProducte,
@@ -144,7 +146,7 @@ app.get('/getProductesBD', (req, res) => {
                             Descripcio: producte.Descripcio,
                             Preu: parseFloat(producte.Preu),
                             Stock: producte.Stock,
-                            Imatge: producte.Imatge,
+                            Imatge: `${baseUrl}/assets/${producte.Imatge}`,
                             Activat: producte.Activat
                         }))
                     };
