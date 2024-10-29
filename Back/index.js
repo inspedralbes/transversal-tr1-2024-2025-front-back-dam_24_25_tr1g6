@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
-const PORT = 3001;
+const PORT = 3010;
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -184,11 +184,8 @@ app.post('/postProducteBD', async (req, res) => {
     )
         .then(([result]) => {
             const productId = result.insertId;
-            return connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
-        })
-        .then(([resultats]) => {
-            const producte = resultats[0];
             const newProduct = {
+                "idProduct": productId,
                 "nomProducte": nomProducte,
                 "Descripcio": Descripcio,
                 "Preu": Preu,
@@ -197,6 +194,10 @@ app.post('/postProducteBD', async (req, res) => {
                 "Activat": Activat
             }
             io.emit("new-product", newProduct)
+            return connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
+        })
+        .then(([resultats]) => {
+            const producte = resultats[0];
             res.json({
                 message: 'Producte afegit correctament',
                 producte: { idProducte: producte.idProducte, nomProducte: producte.nomProducte, Descripcio: producte.Descripcio, Preu: parseFloat(producte.Preu), Stock: producte.Stock, Imatge: producte.Imatge, Activat: producte.Activat }
@@ -229,6 +230,7 @@ app.put('/putProducteBD/:id', async (req, res) => {
     )
     .then(() => {
         const updateProduct = {
+            "idProducte": idProducte,
             "nomProducte": nomProducte,
             "Descripcio": Descripcio,
             "Preu": Preu,
