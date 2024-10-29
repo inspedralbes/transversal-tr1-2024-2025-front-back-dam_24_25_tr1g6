@@ -26,3 +26,11 @@ Inicialitzar Jupyter
 
 - jupyter notebook
 
+Instal·lació NumPy
+
+- pip install numpy
+
+Instal·lació Pandas
+
+- pip install pandas
+
