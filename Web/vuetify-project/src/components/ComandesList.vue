@@ -34,33 +34,6 @@
   </v-container>
 </template>
 <script>
-export default {
-  data() {
-    return {
-      loading: false,
-      search: '',
-      selectedStatus: null,
-      onlyCompleted: false,
-      statusOptions: [
-        { text: 'Pendent de Preparar', value: 'pending' },
-        { text: 'En Preparació', value: 'preparing' },
-        { text: 'Preparats', value: 'prepared' },
-        { text: 'Entregats', value: 'delivered' }
-      ],
-      comandes: [], 
-    };
-  },
-  methods: {
-    cambiarSegunElStatus(value) {
-      this.statusOptions = value;
-    }
-  }
-};
-</script>
-<style scoped>
-.v-card {
-  margin-bottom: 20px;
-}
 
 .add-product-card {
   padding: 20px;
