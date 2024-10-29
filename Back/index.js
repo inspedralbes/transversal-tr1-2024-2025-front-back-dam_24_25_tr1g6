@@ -5,10 +5,10 @@ const fs = require('fs')
 const mysql = require('mysql2/promise');
 const PORT = 3001;
 const path = require('path');
-const { createServer } = require('node:http');
-const { Server } = require('socket.io');
-const server = createServer(app);
-const io = new Server(server);
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
 const cors = require('cors');
 const { error } = require('console');
 app.use(express.json());
@@ -16,13 +16,15 @@ app.use(cors());
 
 let json;
 
-fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
-    if (err) {
-        console.error('Error leyendo el JSON');
-        return;
-    }
-    json = JSON.parse(data);
-})
+// fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
+//     if (err) {
+//         console.error('Error leyendo el JSON');
+//         return;
+//     }
+//     json = JSON.parse(data);
+// })
+
+app.use(express.static('public'));
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -225,14 +227,21 @@ app.put('/putProducteBD/:id', async (req, res) => {
         WHERE idProducte = ?`,
         [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
     )
-        .then(() => {
-            res.json({
-                message: 'Producte actualitzat correctament',
-                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
-            });
-            console.log("Producte actualitzat: ", res.json);
-
-
+    .then(() => {
+        const updateProduct = {
+            "nomProducte": nomProducte,
+            "Descripcio": Descripcio,
+            "Preu": Preu,
+            "Stock": Stock,
+            "Imatge": Imatge,
+            "Activat": Activat
+        }
+        io.emit("update-product", updateProduct)
+        res.json({
+            message: 'Producte actualitzat correctament',
+            producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
+        });
+        console.log("Producte actualitzat: ", res.json);
         })
         .finally(() => {
             connection.end();
@@ -254,6 +263,8 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
 
         await connection.execute(`DELETE FROM producte WHERE idProducte = ?`, [idProducte]);
 
+        io.emit('delete-product', idProducte)
+        
         res.json({
             message: 'Producte eliminat correctament',
             idProducte: idProducte
@@ -271,6 +282,6 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
 });
 
 // Iniciar el servidor
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });
