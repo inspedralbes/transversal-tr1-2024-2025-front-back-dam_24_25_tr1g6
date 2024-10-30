@@ -325,8 +325,6 @@ app.post('/loginBD', async (req, res) => {
 
     const connection = await createConnection();
 
-    console.log(connection)
-
     try {
         const [usuari] = await connection.execute(`SELECT * FROM usuari WHERE Correu = ? AND Contrasenya = ?`, [Correu, Contrasenya]);
         const response = {
@@ -338,17 +336,9 @@ app.post('/loginBD', async (req, res) => {
             Confirmacio: true
         }
 
-        console.log(response)
-        if (usuari.length === 0) {
-            return res.status(404).json({ message: 'Usuari no trobat' });
-        }
-
         res.json(JSON.stringify(response))
     } catch(err) {
-        res.status(500).json({
-            error: 'Error iniciar sessió',
-            details: error.details
-        });
+        res.json({ Confirmacio: false });
     }
 });
 
