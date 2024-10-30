@@ -8,8 +8,13 @@ const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
 const server = http.createServer(app);
-const io = socketIo(server);
 const cors = require('cors');
+const io = socketIo(server, {
+    cors: {
+        origin: "*", // Or restrict it to your Android emulator/device IP
+        methods: ["GET", "POST", "PUT", "DELETE"]
+    }
+});
 const { error } = require('console');
 app.use(express.json());
 app.use(cors());
@@ -29,7 +34,7 @@ app.use(express.static('public'));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('a user connected', socket.id);
     socket.on('disconnect', () => {
       console.log('user disconnected');
     });
@@ -193,7 +198,7 @@ app.post('/postProducteBD', async (req, res) => {
                 "Imatge": Imatge,
                 "Activat": Activat
             }
-            io.emit("new-product", newProduct)
+            io.emit("new-product", JSON.stringify(newProduct))
             return connection.query('SELECT * FROM producte WHERE idProducte = ?', [productId]);
         })
         .then(([resultats]) => {
@@ -238,7 +243,7 @@ app.put('/putProducteBD/:id', async (req, res) => {
             "Imatge": Imatge,
             "Activat": Activat
         }
-        io.emit("update-product", updateProduct)
+        io.emit("update-product", JSON.stringify(updateProduct))
         res.json({
             message: 'Producte actualitzat correctament',
             producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
