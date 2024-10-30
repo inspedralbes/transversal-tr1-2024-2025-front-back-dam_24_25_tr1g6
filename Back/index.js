@@ -325,6 +325,8 @@ app.post('/loginBD', async (req, res) => {
 
     const connection = await createConnection();
 
+    console.log("Correu: " + Correu + "Contrasenya " + Contrasenya)
+
     try {
         const [usuari] = await connection.execute(`SELECT * FROM usuari WHERE Correu = ? AND Contrasenya = ?`, [Correu, Contrasenya]);
         const response = {
@@ -336,8 +338,10 @@ app.post('/loginBD', async (req, res) => {
             Confirmacio: true
         }
 
-        res.json(JSON.stringify(response))
+        console.log(1)
+        res.json(response)
     } catch(err) {
+        console.log(2)
         res.json({ Confirmacio: false });
     }
 });
