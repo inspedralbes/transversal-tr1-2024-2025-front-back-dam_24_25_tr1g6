@@ -16,7 +16,7 @@
           Categories
         </v-btn>
 
-        <v-btn>
+        <v-btn to="/comandes">
           <v-icon>mdi-map-marker</v-icon>
 
           Comandes
