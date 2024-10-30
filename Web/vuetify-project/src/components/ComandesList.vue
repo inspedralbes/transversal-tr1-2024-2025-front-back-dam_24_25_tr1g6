@@ -8,7 +8,7 @@
           v-model="search"
           append-inner-icon="mdi-magnify"
           density="compact"
-          label="Buscar Comanda por Cliente"
+          label="Buscar Comanda per ID"
           variant="solo"
           hide-details
           single-line
@@ -27,7 +27,6 @@
       </v-col>
     </v-row>
 
-    <!-- Lista de comandas -->
     <v-row>
       <v-col cols="12">
         <v-list>
@@ -44,7 +43,7 @@
                 <v-list-item-subtitle>{{ comanda.data }}</v-list-item-subtitle>
               </v-col>
               <v-col cols="2">
-                <v-list-item-subtitle>{{ comanda.total }} €</v-list-item-subtitle>
+                <v-list-item-subtitle>{{ comanda.total }}</v-list-item-subtitle>
               </v-col>
               <v-col cols="2">
                 <v-list-item-subtitle>{{ comanda.status }}</v-list-item-subtitle>
@@ -68,6 +67,7 @@
               :items="comandes"
               :loading="loading"
               class="elevation-1"
+              hide-default-footer
             >
               <template v-slot:items="props">
                 <tr>
@@ -91,7 +91,6 @@ import { getComandes } from "../services/communicationManager.js";
 
 const comandes = ref([]);
 const search = ref("");
-const statusFilter = ref(""); 
 const loading = ref(false);
 
 onMounted(async () => {
