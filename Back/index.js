@@ -320,6 +320,38 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
     }
 });
 
+app.post('/loginBD', async (req, res) => {
+    const { Correu, Contrasenya } = req.body
+
+    const connection = await createConnection();
+
+    console.log(connection)
+
+    try {
+        const [usuari] = await connection.execute(`SELECT * FROM usuari WHERE Correu = ? AND Contrasenya = ?`, [Correu, Contrasenya]);
+        const response = {
+            idUser: usuari[0].idUser,
+            Nom: usuari[0].Nom,
+            Correu: usuari[0].Correu,
+            Contrasenya: usuari[0].Contrasenya,
+            Targeta: usuari[0].Targeta,
+            Confirmacio: true
+        }
+
+        console.log(response)
+        if (usuari.length === 0) {
+            return res.status(404).json({ message: 'Usuari no trobat' });
+        }
+
+        res.json(JSON.stringify(response))
+    } catch(err) {
+        res.status(500).json({
+            error: 'Error iniciar sessió',
+            details: error.details
+        });
+    }
+});
+
 // Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
