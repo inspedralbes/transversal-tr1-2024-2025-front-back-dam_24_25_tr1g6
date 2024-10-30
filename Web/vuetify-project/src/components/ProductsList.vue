@@ -378,6 +378,7 @@ const filteredProductes = computed(() => {
 onMounted(async () => {
   try {
     const response = await getProductes();
+    console.log(response)
     if (Array.isArray(response.productes)) {
       productes.value = response.productes;
     } else {

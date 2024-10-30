@@ -12,6 +12,9 @@
     "back": "file:",
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "mysql2": "^3.11.3"
+    "fs": "^0.0.1-security",
+    "mysql2": "^3.11.3",
+    "socket.io": "^4.8.1",
+    "sockets": "^0.4.2"
   }
 }

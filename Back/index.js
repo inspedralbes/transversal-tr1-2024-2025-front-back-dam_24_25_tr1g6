@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
-const PORT = 3010;
+const PORT = 3001;
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -14,15 +14,25 @@ const { error } = require('console');
 app.use(express.json());
 app.use(cors());
 
-let json;
+ let json;
+  fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
+      if (err) {
+          console.error('Error leyendo el JSON');
+          return;
+      }
+      json = JSON.parse(data);
+  })
 
-// fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
-//     if (err) {
-//         console.error('Error leyendo el JSON');
-//         return;
-//     }
-//     json = JSON.parse(data);
-// })
+ let json2;
+
+ fs.readFile('./db/Comandes.json', 'utf-8', (err, data) => {
+     if(err) {
+         console.error('Error leyendo el JSON');
+         return;
+     }
+     json2 = JSON.parse(data);
+     
+ })
 
 app.use(express.static('public'));
 
@@ -37,8 +47,13 @@ io.on('connection', (socket) => {
 
 // Llegir el fitxer JSON amb els productes
 app.get('/getProductes', (req, res) => {
-    res.send(json.productes);
+    res.send(json);
 });
+
+// Llegir el fitxer JSON amb les comandes
+app.get('/getComandes', (req, res) => {
+    res.send(json2)
+})
 
 // Eliminar producte JSON
 app.delete('/deleteProduct/:id', (req, res) => {

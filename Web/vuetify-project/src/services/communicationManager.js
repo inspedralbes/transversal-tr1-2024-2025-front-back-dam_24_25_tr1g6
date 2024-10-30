@@ -1,5 +1,5 @@
 export async function getProductes() {
-    const response = await fetch(`${import.meta.env.VITE_URL_BACK}/getProductesBD`);
+    const response = await fetch(`${import.meta.env.VITE_URL_BACK}/getProductes`);
     if (!response.ok) {
         throw new Error('Error al obtenir les dades');
     }
