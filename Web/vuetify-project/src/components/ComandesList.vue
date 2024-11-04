@@ -40,7 +40,7 @@
               :items="filteredComandes"
               :loading="loading"
               class="elevation-1"
-              hide-default-footer >
+              hide-default-footer>
             </v-data-table>
           </v-card-text>
         </v-card>
@@ -59,6 +59,7 @@ const statusFilter = ref(null);
 const loading = ref(false);
 const error = ref(null);
 
+
 onMounted(async () => {
   loading.value = true;
   try {
@@ -76,16 +77,26 @@ onMounted(async () => {
   }
 });
 
-const totesLesComandes = () => {
-  if (statusFilter.value = 'Totes les comandes'){
-  }
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`; 
 }
 
 const filteredComandes = computed(() => {
-  return comandes.value.filter((comanda) => {
-    const matchesStatus = statusFilter.value ? comanda.Estat?.toLowerCase() === statusFilter.value.toLowerCase(): true;
-    const matchesSearch = search.value ? comanda.idComanda.toString().includes(search.value): true;
-    return matchesStatus && matchesSearch;
-  });
+  return comandes.value
+    .filter((comanda) => {
+      const matchesStatus = statusFilter.value ? comanda.Estat?.toLowerCase() === statusFilter.value.toLowerCase() : true;
+      const matchesSearch = search.value ? comanda.idComanda.toString().includes(search.value) : true;
+      return matchesStatus && matchesSearch;
+    })
+    .map(comanda => ({
+      ...comanda,
+      data: formatDate(comanda.data)
+    }));
 });
+
 </script>
