@@ -445,8 +445,8 @@ app.post('/newComandes', async (req, res) => {
 
 });
 
-app.put('/actualitzacioEstat/:id', async (req, res) => {
-    const { idComanda } = req.params.id;
+app.put('/actualitzacioEstatBD/:id', async (req, res) => {
+    const idComanda = parseInt(req.params.id);
     const { Estat } = req.body;
 
     const connection = await createConnection();
