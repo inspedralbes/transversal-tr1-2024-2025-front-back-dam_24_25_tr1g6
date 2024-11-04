@@ -16,7 +16,7 @@
       <v-col cols="6" class="text-right">
         <v-select
           v-model="statusFilter"
-          :items="['Totes les comandes', 'Pendent_de_Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
+          :items="['Totes les comandes', 'Pendent de Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
           label="Filtrar per Estat"
           prepend-icon="mdi-filter"
           dense
@@ -40,18 +40,8 @@
               :items="filteredComandes"
               :loading="loading"
               class="elevation-1"
-              hide-default-footer
-            >
-              <template v-slot:items="props">
-                <tr>
-                  <td>{{ props.item.id }}</td>
-                  <td>{{ props.item.fecha }}</td>
-                  <td>{{ props.item.cliente }}</td>
-                  <td>{{ props.item.estado }}</td>
-                </tr>
-              </template>
+              hide-default-footer >
             </v-data-table>
-            <v-alert v-if="error" type="error">{{ error }}</v-alert>
           </v-card-text>
         </v-card>
       </v-col>
@@ -68,14 +58,6 @@ const search = ref("");
 const statusFilter = ref(null); 
 const loading = ref(false);
 const error = ref(null);
-const headers = [
-  { text: "idComanda", value: "idComanda" },
-  { text: "idUsuari", value: "idUsuari" },
-  { text: "Productes", value: "Productes" },
-  { text: "PreuTotal", value: "PreuTotal" },
-  { text: "Estat", value: "Estat" },
-  { text: "data", value: "data" },
-];
 
 onMounted(async () => {
   loading.value = true;
@@ -106,6 +88,4 @@ const filteredComandes = computed(() => {
     return matchesStatus && matchesSearch;
   });
 });
-
-
 </script>
