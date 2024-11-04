@@ -320,6 +320,40 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
     }
 });
 
+app.post('/RegisterBD', async (req, res) => {
+    const { Nom, Correu, Contrasenya } = req.body;
+
+    const connection = await createConnection();
+
+    try {
+        // Ejecutar la inserción
+        const [result] = await connection.execute(
+            `INSERT INTO usuari (Nom, Correu, Contrasenya, Targeta, Admin) 
+            VALUES (?, ?, ?, ?, ?)`,
+            [Nom, Correu, Contrasenya, 0, 0]
+        );
+
+        const idUser = result.insertId;
+        const newUsuari = {
+            idUser: idUser,
+            Nom: Nom,
+            Correu: Correu,
+            Contrasenya: Contrasenya,
+            Targeta: 0,
+            Confirmacio: true
+        };
+
+        console.log("Usuari afegit: ", newUsuari);
+        res.json(JSON.stringify(newUsuari));
+
+    } catch (error) {
+        console.error('Error afegint usuari:', error);
+        res.json({ Confirmacio: false });
+    } finally {
+        await connection.end(); // Asegúrate de cerrar la conexión
+    }
+});
+
 // Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
