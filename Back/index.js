@@ -339,7 +339,7 @@ app.get('/getHistorialComandes/:id', (req, res) => {
                     const response = {
                         Comandes: resultats.map(comanda => ({
                             idComanda: comanda.idComanda,
-                            Productes: comanda.Comandes, // Comprobar
+                            Productes: JSON.parse(comanda.Productes), 
                             PreuTotal: comanda.PreuTotal,
                             Data: data(comanda.data),
                             Estat: String(comanda.Estat)
