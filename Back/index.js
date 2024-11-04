@@ -357,6 +357,40 @@ app.get('/getHistorialComandes/:id', (req, res) => {
         });
 });
 
+app.post('/RegisterBD', async (req, res) => {
+    const { Nom, Correu, Contrasenya } = req.body;
+
+    const connection = await createConnection();
+
+    try {
+        // Ejecutar la inserción
+        const [result] = await connection.execute(
+            `INSERT INTO usuari (Nom, Correu, Contrasenya, Targeta, Admin) 
+            VALUES (?, ?, ?, ?, ?)`,
+            [Nom, Correu, Contrasenya, 0, 0]
+        );
+
+        const idUser = result.insertId;
+        const newUsuari = {
+            idUser: idUser,
+            Nom: Nom,
+            Correu: Correu,
+            Contrasenya: Contrasenya,
+            Targeta: 0,
+            Confirmacio: true
+        };
+
+        console.log("Usuari afegit: ", newUsuari);
+        res.json(JSON.stringify(newUsuari));
+
+    } catch (error) {
+        console.error('Error afegint usuari:', error);
+        res.json({ Confirmacio: false });
+    } finally {
+        await connection.end(); // Asegúrate de cerrar la conexión
+    }
+});
+
 app.post('/loginBD', async (req, res) => {
     const { Correu, Contrasenya } = req.body
 
@@ -381,6 +415,34 @@ app.post('/loginBD', async (req, res) => {
         console.log(2)
         res.json({ Confirmacio: false });
     }
+});
+
+function dataActual() {
+    const dataActual = new Date();
+    const dia = dataActual.getDate();
+    const mes = dataActual.getMonth() + 1;
+    const any = dataActual.getFullYear();
+
+    return `${any}-${mes}-${dia}`;
+}
+
+app.post('/newComandes', async (req, res) => {
+    const { idUsuari, Productes, PreuTotal } = req.body;
+
+    const connection = await createConnection();
+
+    try {
+        await connection.execute( `INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) 
+            VALUES (?, ?, ?, ?)`,
+            [idUsuari, Productes, PreuTotal, dataActual()]);
+
+        res.json({ message: 'Gracies per compra' });
+    } catch (error) {
+        res.json({ message: "No s'ha pogut compra"});
+    } finally {
+        connection.end();
+    }
+
 });
 
 // Iniciar el servidor
