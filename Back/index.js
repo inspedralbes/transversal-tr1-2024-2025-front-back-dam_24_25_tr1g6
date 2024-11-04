@@ -383,6 +383,34 @@ app.post('/loginBD', async (req, res) => {
     }
 });
 
+function dataActual() {
+    const dataActual = new Date();
+    const dia = dataActual.getDate();
+    const mes = dataActual.getMonth() + 1;
+    const any = dataActual.getFullYear();
+
+    return `${any}-${mes}-${dia}`;
+}
+
+app.post('/newComandes', async (req, res) => {
+    const { idUsuari, Productes, PreuTotal } = req.body;
+
+    const connection = await createConnection();
+
+    try {
+        await connection.execute( `INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) 
+            VALUES (?, ?, ?, ?)`,
+            [idUsuari, Productes, PreuTotal, dataActual()]);
+
+        res.json({ message: 'Gracies per compra' });
+    } catch (error) {
+        res.json({ message: "No s'ha pogut compra"});
+    } finally {
+        connection.end();
+    }
+
+});
+
 // Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
