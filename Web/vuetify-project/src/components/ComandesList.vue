@@ -16,7 +16,7 @@
       <v-col cols="6" class="text-right">
         <v-select
           v-model="statusFilter"
-          :items="['Totes les comandes', 'Pendent de Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
+          :items="['Pendent de Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
           label="Filtrar per Estat"
           prepend-icon="mdi-filter"
           dense
