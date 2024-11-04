@@ -445,6 +445,25 @@ app.post('/newComandes', async (req, res) => {
 
 });
 
+app.put('/actualitzacioEstat/:id', async (req, res) => {
+    const { idComanda } = req.params.id;
+    const { Estat } = req.body;
+
+    const connection = await createConnection();
+
+    try {
+        await connection.execute(`UPDATE comandes SET Estat = ? WHERE idComanda = ?`,
+        [Estat, idComanda]);
+
+        io.emit("update-estat", JSON.stringify({ "idComanda": idComanda, "Estat": Estat }))
+        res.json({ message: "Actualitzat l'estat de la comanda" });
+    } catch (error) {
+        res.json({ message: "No s'actualitzat l'estat de la comanda"});
+    } finally {
+        connection.end();
+    }
+});
+
 // Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
