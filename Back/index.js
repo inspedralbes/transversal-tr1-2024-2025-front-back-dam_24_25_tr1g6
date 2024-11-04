@@ -320,6 +320,43 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
     }
 });
 
+function data(data) {
+    const dataISO = String(data.toISOString())
+    const dataFormatjada = dataISO.substring(0, 10);
+    return dataFormatjada;
+}
+
+// Get de les comandes del historial de l'usuari desde l'Android
+app.get('/getHistorialComandes/:id', (req, res) => {
+    const idUsuari = parseInt(req.params.id);
+    createConnection()
+        .then(connection => {
+            return connection.connect()
+                .then(() => {
+                    return connection.query('SELECT * FROM comandes WHERE idUsuari = ?', idUsuari);
+                })
+                .then(([resultats]) => {
+                    const response = {
+                        Comandes: resultats.map(comanda => ({
+                            idComanda: comanda.idComanda,
+                            Productes: comanda.Comandes, // Comprobar
+                            PreuTotal: comanda.PreuTotal,
+                            Data: data(comanda.data),
+                            Estat: String(comanda.Estat)
+                        }))
+                    };
+                    res.json(response);
+                })
+                .finally(() => {
+                    connection.end();
+                });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error);
+            res.status(500).send('Error fetching products');
+        });
+});
+
 app.post('/loginBD', async (req, res) => {
     const { Correu, Contrasenya } = req.body
 
