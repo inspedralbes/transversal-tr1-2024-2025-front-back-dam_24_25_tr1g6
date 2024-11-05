@@ -445,7 +445,7 @@ app.post('/newComandes', async (req, res) => {
 
 });
 
-app.put('/actualitzacioEstatBD/:id', async (req, res) => {
+app.put('/putEstatBD/:id', async (req, res) => {
     const idComanda = parseInt(req.params.id);
     const { Estat } = req.body;
 
