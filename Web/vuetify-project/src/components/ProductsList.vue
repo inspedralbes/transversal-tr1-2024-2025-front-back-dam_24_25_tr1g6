@@ -19,7 +19,7 @@
           v-model="search"
           append-inner-icon="mdi-magnify"
           density="compact"
-          label="Search templates"
+          label="Buscar"
           variant="solo"
           hide-details
           single-line
@@ -36,7 +36,7 @@
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="addProduct.nomProducte"
+                    v-model="nomProducte"
                     label="Nom Producte"
                     prepend-icon="mdi-tag"
                     dense
@@ -46,7 +46,7 @@
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="addProduct.Descripcio"
+                    v-model="Descripcio"
                     label="Descripcio"
                     prepend-icon="mdi-text"
                     dense
@@ -56,7 +56,7 @@
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="addProduct.Preu"
+                    v-model="Preu"
                     label="Preu"
                     prepend-icon="mdi-currency-usd"
                     type="number"
@@ -67,7 +67,7 @@
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="addProduct.Stock"
+                    v-model="Stock"
                     label="Stock"
                     prepend-icon="mdi-package-variant"
                     type="number"
@@ -78,25 +78,25 @@
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-file-input
-                    label="File input w/ chips"
+                    label="Imatge"
                     chips
                     accept="image/*"
                   ></v-file-input>
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-checkbox
-                    v-model="addProduct.Activat"
+                    v-model="Activat"
                     :value="1"
                     label="Activar"
                     dense
-                    @change="addProduct.Activat = 1"
+                    @change="Activat = 1"
                   ></v-checkbox>
                   <v-checkbox
-                    v-model="addProduct.Activat"
+                    v-model="Activat"
                     :value="0"
                     label="Desactivar"
                     dense
-                    @change="addProduct.Activat = 0"
+                    @change="Activat = 0"
                   ></v-checkbox>
                 </v-col>
               </v-row>
@@ -227,29 +227,47 @@
                           ></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
-                          <v-text-field
-                            v-model="editingProduct.Imatge"
-                            label="Imatge URL"
+                          <v-img
+                            v-if="editingProduct.Imatge && !newImage"
+                            :src="editingProduct.Imatge"
+                            max-height="150"
+                            max-width="150"
+                            class="mb-4"
+                          ></v-img>
+                          <v-file-input
+                            label="Seleccionar nueva imagen"
+                            accept="image/*"
+                            v-model="newImage"
                             prepend-icon="mdi-image"
                             dense
                             outlined
-                            required
-                          ></v-text-field>
+                            @change="handleImageChange"
+                          ></v-file-input>
                         </v-col>
                         <v-col cols="12" md="6">
                           <v-checkbox
                             v-model="editingProduct.Activat"
-                            :value="1"
+                            :true-value="1"
+                            :false-value="0"
                             label="Activar"
                             dense
-                            @change="editingProduct.Activat = 1"
+                            @change="
+                              editingProduct.Activat = 1;
+                              if (editingProduct.Activat === 0)
+                                editingProduct.Activat = 1;
+                            "
                           ></v-checkbox>
                           <v-checkbox
                             v-model="editingProduct.Activat"
-                            :value="0"
+                            :true-value="0"
+                            :false-value="1"
                             label="Desactivar"
                             dense
-                            @change="editingProduct.Activat = 0"
+                            @change="
+                              editingProduct.Activat = 0;
+                              if (editingProduct.Activat === 1)
+                                editingProduct.Activat = 0;
+                            "
                           ></v-checkbox>
                         </v-col>
                       </v-row>
@@ -280,17 +298,17 @@ import {
   eliminarProducte,
 } from "../services/communicationManager.js";
 
+const nomProducte = ref("");
+const Descripcio = ref("");
+const Preu = ref(0);
+const Stock = ref(0);
+const Activat = ref(0);
+
 const productes = ref([]);
+const newImage = ref(null);
 const search = ref("");
 const showAddProductForm = ref(false);
-const addProduct = ref({
-  nomProducte: "",
-  Descripcio: "",
-  Preu: 0,
-  Stock: 0,
-  Activat: 0,
-  Imatge: "",
-});
+
 const editingProduct = ref(null);
 const loading = ref(false);
 
@@ -299,41 +317,70 @@ const toggleAddProductForm = () => {
 };
 
 const callAddProduct = async () => {
-  try {
-    loading.value = true;
-    const nouProduct = await crearProductes(addProduct.value);
-    if (nouProduct && nouProduct.producte) {
-      productes.value.push(nouProduct.producte);
-    }
-    addProduct.value = {
-      nomProducte: "",
-      Descripcio: "",
-      Preu: 0,
-      Stock: 0,
-      Activat: 0,
-      Imatge: "",
+  loading.value = true;
+  if (
+    nomProducte.value == null ||
+    Descripcio.value == null ||
+    Preu.value == null ||
+    Stock.value == null ||
+    Activat.value == null
+  ) {
+    alert("Falten camps per omplir");
+    return;
+  } else {
+    const formData = {
+      nomProducte: nomProducte.value,
+      Descripcio: Descripcio.value,
+      Preu: Preu.value,
+      Stock: Stock.value,
+      Activat: Activat.value,
     };
+
+    const imageInput = document.querySelector("input[type='file']");
+    await crearProductes(formData, imageInput.files[0]);
+
     showAddProductForm.value = false;
-  } catch (error) {
-    console.error("Error adding product:", error);
-  } finally {
-    loading.value = false;
   }
 };
 
 const callEditProduct = async () => {
+  loading.value = true;
+
+  if (
+    editingProduct.value.nomProducte == null ||
+    editingProduct.value.Descripcio == null ||
+    editingProduct.value.Preu == null ||
+    editingProduct.value.Stock == null ||
+    editingProduct.value.Activat == null
+  ) {
+    alert("Falten camps per omplir");
+    loading.value = false;
+    return;
+  }
+
+  const formData = {
+    idProducte: editingProduct.value.idProducte,
+    nomProducte: editingProduct.value.nomProducte,
+    Descripcio: editingProduct.value.Descripcio,
+    Preu: editingProduct.value.Preu,
+    Stock: editingProduct.value.Stock,
+    Activat: editingProduct.value.Activat,
+  };
+
+  const imageFile = newImage.value ? newImage.value : null;
+
   try {
-    const updatedProduct = await modificarProducte(editingProduct.value);
-    if (!updatedProduct || !updatedProduct.idProducte) {
-      throw new Error("Error updating product");
-    }
+    const updatedProduct = await modificarProducte(formData, imageFile);
 
     const index = productes.value.findIndex(
       (p) => p.idProducte === updatedProduct.idProducte
     );
 
     if (index !== -1) {
-      productes.value[index] = updatedProduct;
+      productes.value[index] = {
+        ...updatedProduct,
+        Activat: updatedProduct.Activat,
+      };
     }
     editingProduct.value = null;
   } catch (error) {

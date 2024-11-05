@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
-const PORT = 3010;
+const PORT = 3001;
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -15,19 +15,31 @@ const io = socketIo(server, {
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
+const multer = require('multer');
 const { error } = require('console');
 app.use(express.json());
 app.use(cors());
 
-let json;
+app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')));
 
-// fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
-//     if (err) {
-//         console.error('Error leyendo el JSON');
-//         return;
-//     }
-//     json = JSON.parse(data);
-// })
+let json;
+let uploadedImages = {};
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/images');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        const fileName = uniqueSuffix + path.extname(file.originalname);
+
+        uploadedImages[fileName] = Date.now();
+
+        cb(null, fileName);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 app.use(express.static('public'));
 
@@ -209,15 +221,21 @@ app.get('/getComandesBD', (req, res) => {
 });
 
 // Post Producte Base de Dades
-app.post('/postProducteBD', async (req, res) => {
-    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
+app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
+    const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
+
+    if (!req.file) {
+        console.error("no se ha subido ninguna imagen");
+        return res.status(400).send('No s\'ha pujat cap imatge');
+    }
 
     const connection = await createConnection();
+    const imatgePath = req.file.path;
 
     return connection.execute(
         `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
         VALUES (?, ?, ?, ?, ?, ?)`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat]
+        [nomProducte, Descripcio, Preu, Stock, imatgePath, Activat]
     )
         .then(([result]) => {
             const productId = result.insertId;
@@ -227,7 +245,7 @@ app.post('/postProducteBD', async (req, res) => {
                 "Descripcio": Descripcio,
                 "Preu": Preu,
                 "Stock": Stock,
-                "Imatge": Imatge,
+                "Imatge": imatgePath,
                 "Activat": Activat
             }
             io.emit("new-product", JSON.stringify(newProduct))
@@ -252,18 +270,29 @@ app.post('/postProducteBD', async (req, res) => {
 });
 
 // Update Producte Base de Dades
-app.put('/putProducteBD/:id', async (req, res) => {
+app.put('/putProducteBD/:id', upload.single('Imatge'), async (req, res) => {
     const idProducte = parseInt(req.params.id);
-
-    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
+    const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
 
     const connection = await createConnection();
+
+    // Verificar si se ha subido una nueva imagen
+    let imatgePath = req.file ? req.file.path : null; // Si no se sube nueva imagen, será null
+
+    // Obtener la imagen actual de la base de datos
+    const [rows] = await connection.execute(`SELECT Imatge FROM producte WHERE idProducte = ?`, [idProducte]);
+    const currentImagePath = rows.length > 0 ? rows[0].Imatge : null; // Imagen actual
+
+    // Si no hay una nueva imagen, mantén la imagen actual
+    if (!imatgePath) {
+        imatgePath = currentImagePath;
+    }
 
     return connection.execute(
         `UPDATE producte 
         SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ?, Activat = ? 
         WHERE idProducte = ?`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
+        [nomProducte, Descripcio, Preu, Stock, imatgePath, Activat, idProducte]
     )
         .then(() => {
             const updateProduct = {
@@ -272,13 +301,13 @@ app.put('/putProducteBD/:id', async (req, res) => {
                 "Descripcio": Descripcio,
                 "Preu": Preu,
                 "Stock": Stock,
-                "Imatge": Imatge,
+                "Imatge": imatgePath,
                 "Activat": Activat
             }
             io.emit("update-product", JSON.stringify(updateProduct))
             res.json({
                 message: 'Producte actualitzat correctament',
-                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
+                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, imatgePath }
             });
             console.log("Producte actualitzat: ", res.json);
         })
@@ -286,6 +315,7 @@ app.put('/putProducteBD/:id', async (req, res) => {
             connection.end();
         });
 });
+
 
 // Delete Producte Base de Dades
 app.delete('/deleteProducteBD/:id', async (req, res) => {
