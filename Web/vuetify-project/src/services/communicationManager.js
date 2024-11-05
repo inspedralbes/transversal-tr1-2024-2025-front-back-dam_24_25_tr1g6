@@ -85,11 +85,8 @@ export async function eliminarProducte(idProducte) {
     try {
         const response = await fetch(`${import.meta.env.VITE_URL_BACK}/deleteProducteBD/${idProducte}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
         });
-
+        
         if (!response.ok) {
             throw new Error('Error al eliminar el producte');
         }
