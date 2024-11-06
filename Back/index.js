@@ -132,15 +132,15 @@ app.post('/postProducte', (req, res) => {
 // Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
-        host: 'dam.inspedralbes.cat',
-        user: 'a21rublormar_admin',
-        password: 'InsPedralbes2024',
-        database: 'a21rublormar_TR1_GR6'
-        // host: 'localhost',
-        // user: 'root',
-        // password: '',
-        // database: 'a21rublormar_TR1_GR6',
-        // port: 3306
+        // host: 'dam.inspedralbes.cat',
+        // user: 'a21rublormar_admin',
+        // password: 'InsPedralbes2024',
+        // database: 'a21rublormar_TR1_GR6'
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'a21rublormar_TR1_GR6',
+        port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -453,16 +453,44 @@ function dataActual() {
     return `${any}-${mes}-${dia}`;
 }
 
-app.post('/newComandes', async (req, res) => {
+app.post('/newComandesBD', async (req, res) => {
     const { idUsuari, Productes, PreuTotal } = req.body;
 
     const connection = await createConnection();
 
     try {
-        await connection.execute(`INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) 
-            VALUES (?, ?, ?, ?)`,
-            [idUsuari, Productes, PreuTotal, dataActual()]);
+        const ProductesText = JSON.stringify(Productes);
 
+        const [resultComanda] = await connection.execute('INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) VALUES (?, ?, ?, ?)', [idUsuari, ProductesText, PreuTotal, dataActual()]);
+
+        const idComanda = resultComanda.insertId;
+
+        const [result] = await connection.execute('SELECT * FROM comandes WHERE idComanda = ?', [idComanda]);
+
+        for (const element of Productes) {
+            await connection.execute(
+                `UPDATE producte SET Stock = GREATEST(Stock - ?, 0) WHERE idProducte = ?`, 
+                [element.quantitat, element.idProducte]
+            );
+        }
+
+        const responseVue = {
+            idComanda: result[0].idComanda,
+            idUsuari: result[0].idUsuari,
+            Productes: result[0].Productes,
+            PreuTotal: result[0].PreuTotal,
+            Estat: result[0].Estat,
+            Data: result[0].data
+        }
+
+        // Preparar respuesta para enviar a través de Socket.IO y al cliente
+        const response = Productes.map(element => ({
+            idProducte: element.idProducte,
+            Stock: element.quantitat
+        }));
+
+        io.emit('new-comanda', responseVue)
+        io.emit('update-producte', response)
         res.json({ message: 'Gracies per compra' });
     } catch (error) {
         res.json({ message: "No s'ha pogut compra" });
