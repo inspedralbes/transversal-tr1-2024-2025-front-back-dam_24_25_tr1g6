@@ -33,6 +33,10 @@
         <v-card>
           <v-card-title>
             <h2>Comandes</h2>
+            <v-btn
+            @click="updateEstat">
+              Actualitzar estat
+            </v-btn>
           </v-card-title>
           <v-card-text>
             <v-data-table
@@ -46,7 +50,7 @@
                 v-model="item.Estat"
                 :items="['Pendent de Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
                 dense
-                @click="updateEstat(item)"
+                @change="updateEstat(item)"
                 outlined
               ></v-select>
               </template>
@@ -60,14 +64,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getComandes } from "../services/communicationManager.js";
+import { getComandes, updateEstat } from "../services/communicationManager.js";
 
 const comandes = ref([]);
 const search = ref("");
 const statusFilter = ref(null); 
 const loading = ref(false);
 const error = ref(null);
-
 
 onMounted(async () => {
   loading.value = true;
@@ -85,7 +88,6 @@ onMounted(async () => {
     loading.value = false;
   }
 });
-
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -107,28 +109,5 @@ const filteredComandes = computed(() => {
       data: formatDate(comanda.data)
     }));
 });
-
-const updateEstat = async (item) => {
-  console.log("hola");
-  try {
-    const response = await fetch(`/putEstatBD/${item.idComanda}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ Estat: item.Estat }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log(data.message);
-    } else {
-      console.error("Error al actualizar el estado:", data.message);
-    }
-  } catch (err) {
-    console.error("Error en la comunicación con el servidor:", err);
-  } 
-};
 
 </script>

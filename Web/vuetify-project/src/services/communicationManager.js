@@ -99,4 +99,26 @@ export async function eliminarProducte(idProducte) {
     }
 }
 
+export async function updateEstat(item) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACK}/putEstatBD/${item.idComanda}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Estat: item.Estat }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log(data.message);
+      } else {
+        console.error("Error al actualizar el estado:", data.message);
+      }
+    } catch (err) {
+      console.error("Error en la comunicación con el servidor:", err);
+    }
+  };
+
 
