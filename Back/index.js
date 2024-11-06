@@ -490,7 +490,6 @@ app.put('/putEstatBD/:id', async (req, res) => {
         connection.end();
     }
 });
-
 // Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);

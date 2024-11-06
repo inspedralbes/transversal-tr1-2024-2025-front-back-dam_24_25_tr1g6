@@ -41,6 +41,15 @@
               :loading="loading"
               class="elevation-1"
               hide-default-footer>
+              <template v-slot:item.Estat="{ item }">
+              <v-select
+                v-model="item.Estat"
+                :items="['Pendent de Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
+                dense
+                @click="updateEstat(item)"
+                outlined
+              ></v-select>
+              </template>
             </v-data-table>
           </v-card-text>
         </v-card>
@@ -98,5 +107,28 @@ const filteredComandes = computed(() => {
       data: formatDate(comanda.data)
     }));
 });
+
+const updateEstat = async (item) => {
+  console.log("hola");
+  try {
+    const response = await fetch(`/putEstatBD/${item.idComanda}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ Estat: item.Estat }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log(data.message);
+    } else {
+      console.error("Error al actualizar el estado:", data.message);
+    }
+  } catch (err) {
+    console.error("Error en la comunicación con el servidor:", err);
+  } 
+};
 
 </script>
