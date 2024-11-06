@@ -489,8 +489,8 @@ app.post('/newComandesBD', async (req, res) => {
             Stock: element.quantitat
         }));
 
-        io.emit('new-comanda', responseVue)
-        io.emit('update-producte', response)
+        io.emit('new-comanda', responseVue);
+        io.emit('update-stock', JSON.stringify(response));
         res.json({ message: 'Gracies per compra' });
     } catch (error) {
         res.json({ message: "No s'ha pogut compra" });
