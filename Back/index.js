@@ -7,31 +7,39 @@ const PORT = 3010;
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
-const server = http.createServer(app);
 const cors = require('cors');
+const multer = require('multer');
+const { error } = require('console');
+app.use(express.json());
+app.use(cors());
+
+app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')));
+const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: "*", // Or restrict it to your Android emulator/device IP
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
-const { error } = require('console');
-app.use(express.json());
-app.use(cors());
 
 let json;
+let uploadedImages = {};
 
-// fs.readFile('./db/Productes.json', 'utf-8', (err, data) => {
-//     if (err) {
-//         console.error('Error leyendo el JSON');
-//         return;
-//     }
-//     json = JSON.parse(data);
-// })
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/images');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        const fileName = uniqueSuffix + path.extname(file.originalname);
 
-app.use(express.static('public'));
+        uploadedImages[fileName] = Date.now();
 
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+        cb(null, fileName);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 io.on('connection', (socket) => {
     console.log('a user connected', socket.id);
@@ -124,15 +132,15 @@ app.post('/postProducte', (req, res) => {
 // Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
-        // host: 'dam.inspedralbes.cat',
-        // user: 'a21rublormar_admin',
-        // password: 'InsPedralbes2024',
-        // database: 'a21rublormar_TR1_GR6'
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'a21rublormar_TR1_GR6',
-        port: 3306
+        host: 'dam.inspedralbes.cat',
+        user: 'a21rublormar_admin',
+        password: 'InsPedralbes2024',
+        database: 'a21rublormar_TR1_GR6'
+        // host: 'localhost',
+        // user: 'root',
+        // password: '',
+        // database: 'a21rublormar_TR1_GR6',
+        // port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -209,25 +217,33 @@ app.get('/getComandesBD', (req, res) => {
 });
 
 // Post Producte Base de Dades
-app.post('/postProducteBD', async (req, res) => {
-    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
+app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
+    const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
+
+    if (!req.file) {
+        console.error("no se ha subido ninguna imagen");
+        return res.status(400).send('No s\'ha pujat cap imatge');
+    }
 
     const connection = await createConnection();
+    const imatgePath = req.file ? req.file.path : null;
+    const imatge = imatgePath ? path.basename(imatgePath) : null;
+    
 
     return connection.execute(
         `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
         VALUES (?, ?, ?, ?, ?, ?)`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat]
+        [nomProducte, Descripcio, Preu, Stock, imatge, Activat]
     )
         .then(([result]) => {
             const productId = result.insertId;
             const newProduct = {
-                "idProduct": productId,
+                "idProducte": productId,
                 "nomProducte": nomProducte,
                 "Descripcio": Descripcio,
                 "Preu": Preu,
                 "Stock": Stock,
-                "Imatge": Imatge,
+                "Imatge": imatge,
                 "Activat": Activat
             }
             io.emit("new-product", JSON.stringify(newProduct))
@@ -252,18 +268,28 @@ app.post('/postProducteBD', async (req, res) => {
 });
 
 // Update Producte Base de Dades
-app.put('/putProducteBD/:id', async (req, res) => {
+app.put('/putProducteBD/:id', upload.single('Imatge'), async (req, res) => {
     const idProducte = parseInt(req.params.id);
-
-    const { nomProducte, Descripcio, Preu, Stock, Imatge, Activat } = req.body;
+    const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
 
     const connection = await createConnection();
 
+    // Verificar si se ha subido una nueva imagen
+    let imatgePath = req.file ? req.file.path : null; // Si no se sube nueva imagen, será null
+    const imatge = imatgePath ? path.basename(imatgePath) : null;
+
+    // Obtener la imagen actual de la base de datos
+    const [rows] = await connection.execute(`SELECT Imatge FROM producte WHERE idProducte = ?`, [idProducte]);
+    const currentImagePath = rows.length > 0 ? rows[0].Imatge : null; // Imagen actual
+
+    const finalImage = imatge || currentImagePath;
+
+    // Si no hay una nueva imagen, mantén la imagen actual
     return connection.execute(
         `UPDATE producte 
         SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ?, Activat = ? 
         WHERE idProducte = ?`,
-        [nomProducte, Descripcio, Preu, Stock, Imatge, Activat, idProducte]
+        [nomProducte, Descripcio, Preu, Stock, finalImage, Activat, idProducte]
     )
         .then(() => {
             const updateProduct = {
@@ -272,13 +298,13 @@ app.put('/putProducteBD/:id', async (req, res) => {
                 "Descripcio": Descripcio,
                 "Preu": Preu,
                 "Stock": Stock,
-                "Imatge": Imatge,
+                "Imatge": finalImage,
                 "Activat": Activat
             }
             io.emit("update-product", JSON.stringify(updateProduct))
             res.json({
                 message: 'Producte actualitzat correctament',
-                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, Imatge }
+                producte: { idProducte, nomProducte, Descripcio, Preu, Stock, Activat, imatgePath }
             });
             console.log("Producte actualitzat: ", res.json);
         })
@@ -286,6 +312,7 @@ app.put('/putProducteBD/:id', async (req, res) => {
             connection.end();
         });
 });
+
 
 // Delete Producte Base de Dades
 app.delete('/deleteProducteBD/:id', async (req, res) => {
@@ -302,7 +329,7 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
 
         await connection.execute(`DELETE FROM producte WHERE idProducte = ?`, [idProducte]);
 
-        io.emit('delete-product', idProducte)
+        io.emit('delete-product', JSON.stringify(idProducte))
 
         res.json({
             message: 'Producte eliminat correctament',
@@ -339,7 +366,7 @@ app.get('/getHistorialComandes/:id', (req, res) => {
                     const response = {
                         Comandes: resultats.map(comanda => ({
                             idComanda: comanda.idComanda,
-                            Productes: comanda.Comandes, // Comprobar
+                            Productes: JSON.parse(comanda.Productes),
                             PreuTotal: comanda.PreuTotal,
                             Data: data(comanda.data),
                             Estat: String(comanda.Estat)
@@ -411,7 +438,7 @@ app.post('/loginBD', async (req, res) => {
 
         console.log(1)
         res.json(response)
-    } catch(err) {
+    } catch (err) {
         console.log(2)
         res.json({ Confirmacio: false });
     }
@@ -432,13 +459,13 @@ app.post('/newComandes', async (req, res) => {
     const connection = await createConnection();
 
     try {
-        await connection.execute( `INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) 
+        await connection.execute(`INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) 
             VALUES (?, ?, ?, ?)`,
             [idUsuari, Productes, PreuTotal, dataActual()]);
 
         res.json({ message: 'Gracies per compra' });
     } catch (error) {
-        res.json({ message: "No s'ha pogut compra"});
+        res.json({ message: "No s'ha pogut compra" });
     } finally {
         connection.end();
     }
