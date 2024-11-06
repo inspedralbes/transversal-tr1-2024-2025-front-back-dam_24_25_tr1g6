@@ -222,7 +222,7 @@ app.post('/postProducteBD', async (req, res) => {
         .then(([result]) => {
             const productId = result.insertId;
             const newProduct = {
-                "idProduct": productId,
+                "idProducte": productId,
                 "nomProducte": nomProducte,
                 "Descripcio": Descripcio,
                 "Preu": Preu,
@@ -302,7 +302,7 @@ app.delete('/deleteProducteBD/:id', async (req, res) => {
 
         await connection.execute(`DELETE FROM producte WHERE idProducte = ?`, [idProducte]);
 
-        io.emit('delete-product', idProducte)
+        io.emit('delete-product', JSON.stringify(idProducte))
 
         res.json({
             message: 'Producte eliminat correctament',
