@@ -441,6 +441,24 @@ app.post('/loginBD', async (req, res) => {
     }
 });
 
+app.put('/updatePerfil/:id', async (req, res) => {
+    const idUsuari = parseInt(req.params.id);
+    const { Nom, Correu, Contrasenya } = req.body;
+
+    const connection = await createConnection();
+    
+    try {
+        await connection.execute(`UPDATE usuari SET Nom = ?, Correu = ?, Contrasenya = ? WHERE idUser = ?`,
+        [Nom, Correu, Contrasenya, idUsuari]);
+
+        res.json({ message: "Actualitzat el perfil" });
+    } catch (error) {
+        res.json({ message: "No s'actualitzat el perfil"});
+    } finally {
+        connection.end();
+    }
+});
+
 function dataActual() {
     const dataActual = new Date();
     const dia = dataActual.getDate();
