@@ -1,6 +1,8 @@
 <template>
   <v-app-bar app color="primary" dark>
-    <v-toolbar-title>JUICE N'GO</v-toolbar-title>
+    <v-toolbar-title>
+      <v-btn to="/juice">JUICE N'GO</v-btn>
+    </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-layout class="overflow-visible" style="height: 56px">
       <v-bottom-navigation v-model="value" color="teal" grow rounded="lg">
@@ -10,10 +12,10 @@
           Productes
         </v-btn>
 
-        <v-btn>
-          <v-icon>mdi-heart</v-icon>
+        <v-btn to="/estadistiques">
+          <v-icon>mdi-chart-line</v-icon>
 
-          Categories
+          Estadistiques
         </v-btn>
 
         <v-btn to="/comandes">
