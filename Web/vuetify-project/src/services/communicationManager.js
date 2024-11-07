@@ -99,26 +99,27 @@ export async function eliminarProducte(idProducte) {
     }
 }
 
-export async function updateEstat(item) {
+// Esta es la función que haces para llamar al backend
+export async function updateEstat(idComanda, Estat) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_URL_BACK}/putEstatBD/${item.idComanda}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ Estat: item.Estat }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        console.log(data.message);
-      } else {
-        console.error("Error al actualizar el estado:", data.message);
-      }
+        const response = await fetch(`${import.meta.env.VITE_URL_BACK}/putEstatBD/${idComanda}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ Estat })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log(data.message); // Mensaje de éxito
+        } else {
+            console.error("Error al actualizar el estado:", data.message); // Manejo de error
+        }
     } catch (err) {
-      console.error("Error en la comunicación con el servidor:", err);
+        console.error("Error en la comunicación con el servidor:", err); // Error de red
     }
-  };
+}
 
 
