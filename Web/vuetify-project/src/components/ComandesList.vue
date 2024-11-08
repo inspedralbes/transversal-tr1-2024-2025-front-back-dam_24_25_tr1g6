@@ -52,21 +52,13 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { getComandes } from "../services/communicationManager.js";
-import { io } from "socket.io-client";
+import { funcionSockets } from "../services/socket-io.js";
 
-const socket = io("http://localhost:3010");
 const comandes = ref([]);
 const search = ref("");
 const statusFilter = ref(null); 
 const loading = ref(false);
 const error = ref(null);
-
-
-socket.on("new-comanda", (newComanda) => {
-  newComanda.Productes = formatProductes(newComanda.Productes);
-  comandes.value.push(newComanda);  
-  console.log(comandes.value)
-});
 
 onMounted(async () => {
   loading.value = true;
@@ -119,4 +111,6 @@ const formatProductes = (Productes) => {
     return `${producto.idProducte} ${producto.nomProducte} ${producto.quantitat}`;
   }).join(', ');
 };
+
+funcionSockets(comandes, formatProductes);
 </script>
