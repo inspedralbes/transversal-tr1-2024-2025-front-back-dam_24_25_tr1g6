@@ -535,6 +535,55 @@ app.put('/putEstatBD/:id', async (req, res) => {
     }
 });
 
+app.get('/statistics-clients', async (req, res) => {
+    const connection = await createConnection();
+
+    try {
+        const [rows] = await connection.execute(`
+            SELECT idUsuari AS ID, u.Nom AS Clients,
+                   COUNT(c.idComanda) AS Ventes,
+                   SUM(c.PreuTotal) AS Diners,
+                   AVG(c.PreuTotal) AS \`Diners/venda\`
+            FROM usuari u
+            JOIN comandes c ON u.idUser = c.idUsuari
+            GROUP BY u.Nom;
+        `);
+
+        res.json(rows);
+    } catch (error) {
+        console.error("Error al ejecutar la consulta:", error);
+        res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
+    } finally {
+        connection.end();
+    }
+});
+
+app.get('/statistics-client', async (req, res) => {
+    const { Correu } = req.query;
+
+    const connection = await createConnection();
+
+    try {
+        const [idUsuariResult] = await connection.execute(`SELECT idUser FROM usuari WHERE Correu = ?`, [Correu]);
+
+        if (idUsuariResult.length === 0) {
+            return res.status(404).json({ message: "Usuari no trobat" });
+        }
+
+        const idUsuari = idUsuariResult[0].idUser;
+        
+        const [rows] = await connection.execute('SELECT * FROM comandes WHERE idUsuari = ?', [idUsuari]);
+        
+        res.json(rows);
+    } catch (error) {
+        console.error("Error en executar la consulta: ", error);
+        res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
+    } finally {
+        connection.end();
+    }
+});
+
+
 // Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
