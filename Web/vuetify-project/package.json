@@ -11,9 +11,7 @@
     "@mdi/font": "7.4.47",
     "core-js": "^3.37.1",
     "roboto-fontface": "*",
-    "socket.io-client": "^4.8.1",
     "vue": "^3.4.31",
-    "vue-toastification": "^2.0.0-rc.5",
     "vuetify": "^3.6.11",
     "vuetify-project": "file:"
   },
