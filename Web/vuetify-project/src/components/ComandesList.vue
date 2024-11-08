@@ -64,7 +64,7 @@ const error = ref(null);
 
 socket.on("new-comanda", (newComanda) => {
   newComanda.Productes = formatProductes(newComanda.Productes);
-  comandes.value.push(newComanda);
+  comandes.value.push(newComanda);  
   console.log(comandes.value)
 });
 
@@ -73,9 +73,15 @@ onMounted(async () => {
   try {
     const response = await getComandes();
     if (Array.isArray(response.comandes)) {
-      comandes.value = response.comandes;
-      console.log(comandes.value)
-      //comandes.value.Productes = formatProductes(response.comandes.Productes);
+      comandes.value = response.comandes.map(comanda => {
+        if (Array.isArray(comanda.Productes)) {
+          comanda.Productes = formatProductes(comanda.Productes);
+        } else {
+          console.error("La propiedad Productes no es un array en una de las comandes");
+        }
+        return comanda;
+      });
+      console.log(comandes.value);
     } else {
       console.error("El JSON de comandes no és un array");
     }
@@ -86,7 +92,6 @@ onMounted(async () => {
     loading.value = false;
   }
 });
-
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);

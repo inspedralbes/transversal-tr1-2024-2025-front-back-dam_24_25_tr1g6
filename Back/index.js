@@ -498,7 +498,7 @@ app.post('/newComandesBD', async (req, res) => {
             Productes: JSON.parse(result[0].Productes),
             PreuTotal: result[0].PreuTotal,
             Estat: result[0].Estat,
-            Data: result[0].data
+            data: result[0].data
         }
 
         // Preparar respuesta para enviar a través de Socket.IO y al cliente
@@ -507,7 +507,7 @@ app.post('/newComandesBD', async (req, res) => {
             Stock: element.quantitat
         }));
 
-        io.emit('new-comanda', responseVue);
+        io.emit('new-comanda');
         io.emit('update-stock', JSON.stringify(response));
         res.json({ message: 'Gracies per compra'});
     } catch (error) {
