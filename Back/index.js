@@ -228,7 +228,7 @@ app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
     const connection = await createConnection();
     const imatgePath = req.file ? req.file.path : null;
     const imatge = imatgePath ? path.basename(imatgePath) : null;
-    
+
 
     return connection.execute(
         `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
@@ -361,7 +361,7 @@ app.get('/getHistorialComandes/:id', async (req, res) => {
 
     try {
         const [resultats] = await connection.execute('SELECT * FROM comandes WHERE idUsuari = ?', [idUsuari]);
-        
+
         const response = {
             Comandes: resultats.map(comanda => ({
                 idComanda: comanda.idComanda,
@@ -371,7 +371,7 @@ app.get('/getHistorialComandes/:id', async (req, res) => {
                 Estat: comanda.Estat
             }))
         };
-        
+
         res.json(response);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -442,18 +442,20 @@ app.post('/loginBD', async (req, res) => {
 });
 
 app.put('/updatePerfil/:id', async (req, res) => {
+
+    console.log("updateUser" + "idUsuari: " + idUsuari + "Nom: " + Nom + "Correu: " + Correu + "Contrasenya: " + Contrasenya);
     const idUsuari = parseInt(req.params.id);
     const { Nom, Correu, Contrasenya } = req.body;
 
     const connection = await createConnection();
-    
+
     try {
         await connection.execute(`UPDATE usuari SET Nom = ?, Correu = ?, Contrasenya = ? WHERE idUser = ?`,
-        [Nom, Correu, Contrasenya, idUsuari]);
+            [Nom, Correu, Contrasenya, idUsuari]);
 
         res.json({ message: "Actualitzat el perfil" });
     } catch (error) {
-        res.json({ message: "No s'actualitzat el perfil"});
+        res.json({ message: "No s'actualitzat el perfil" });
     } finally {
         connection.end();
     }
@@ -476,7 +478,7 @@ app.post('/newComandesBD', async (req, res) => {
     try {
         const ProductesText = JSON.stringify(Productes);
 
-        const [resultComanda] = await connection.execute('INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) VALUES (?, ?, ?, ?)', 
+        const [resultComanda] = await connection.execute('INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) VALUES (?, ?, ?, ?)',
             [idUsuari, ProductesText, PreuTotal, dataActual()]);
 
         const idComanda = resultComanda.insertId;
@@ -485,7 +487,7 @@ app.post('/newComandesBD', async (req, res) => {
 
         for (const element of Productes) {
             await connection.execute(
-                `UPDATE producte SET Stock = GREATEST(Stock - ?, 0) WHERE idProducte = ?`, 
+                `UPDATE producte SET Stock = GREATEST(Stock - ?, 0) WHERE idProducte = ?`,
                 [element.quantitat, element.idProducte]
             );
         }
@@ -524,12 +526,12 @@ app.put('/putEstatBD/:id', async (req, res) => {
 
     try {
         await connection.execute(`UPDATE comandes SET Estat = ? WHERE idComanda = ?`,
-        [Estat, idComanda]);
+            [Estat, idComanda]);
 
         io.emit("update-estat", JSON.stringify({ "idComanda": idComanda, "Estat": Estat }))
         res.json({ message: "Actualitzat l'estat de la comanda" });
     } catch (error) {
-        res.json({ message: "No s'actualitzat l'estat de la comanda"});
+        res.json({ message: "No s'actualitzat l'estat de la comanda" });
     } finally {
         connection.end();
     }
