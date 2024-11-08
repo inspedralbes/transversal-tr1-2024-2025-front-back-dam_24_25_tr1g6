@@ -515,7 +515,7 @@ app.put('/putEstatBD/:id', async (req, res) => {
     }
 });
 
-app.get('/estadistiques', async (req, res) => {
+app.get('/statistics-clients', async (req, res) => {
     const connection = await createConnection();
 
     try {
@@ -532,13 +532,13 @@ app.get('/estadistiques', async (req, res) => {
         res.json(rows);
     } catch (error) {
         console.error("Error al ejecutar la consulta:", error);
-        res.json({ message: "No es va poder executar la consulta", error: error.message });
+        res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
     } finally {
         connection.end();
     }
 });
 
-app.get('/user-comandes', async (req, res) => {
+app.get('/statistics-client', async (req, res) => {
     const { Correu } = req.query;
 
     const connection = await createConnection();
