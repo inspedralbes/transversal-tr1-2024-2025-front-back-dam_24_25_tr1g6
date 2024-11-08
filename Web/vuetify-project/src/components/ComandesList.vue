@@ -40,12 +40,25 @@
               :items="filteredComandes"
               :loading="loading"
               class="elevation-1"
-              hide-default-footer>
+              hide-default-footer
+            >
             </v-data-table>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+
+    <v-dialog v-model="showAlert" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Nova comanda!</v-card-title>
+        <v-card-text>
+          S'ha rebut una nova comanda
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="white" text @click="showAlert = false">Tancar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -54,11 +67,13 @@ import { ref, onMounted, computed } from "vue";
 import { getComandes } from "../services/communicationManager.js";
 import { funcionSockets } from "../services/socket-io.js";
 
+// Estados
 const comandes = ref([]);
 const search = ref("");
-const statusFilter = ref(null); 
+const statusFilter = ref(null);
 const loading = ref(false);
 const error = ref(null);
+const showAlert = ref(false);  
 
 onMounted(async () => {
   loading.value = true;
@@ -112,5 +127,36 @@ const formatProductes = (Productes) => {
   }).join(', ');
 };
 
-funcionSockets(comandes, formatProductes);
+funcionSockets(comandes, formatProductes, showAlert);
 </script>
+
+<style>
+
+.v-dialog .v-card-title {
+  background-color: #388E3C;
+  color: white; 
+  font-weight: bold;
+  text-align: center;
+  padding: 16px;
+}
+
+.v-dialog .v-card-text {
+  color: #ffffff;
+  font-size: 16px;
+  padding: 20px;
+}
+
+.v-dialog .v-btn {
+  background-color: #388E3C;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 8px 16px;
+  transition: background-color 0.3s;
+}
+
+.v-dialog .v-btn:hover {
+  background-color: #a23030;
+}
+</style>
