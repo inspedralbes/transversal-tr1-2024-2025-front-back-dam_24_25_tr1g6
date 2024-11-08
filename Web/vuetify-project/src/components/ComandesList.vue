@@ -53,12 +53,22 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-snackbar
+      :timeout="1500"
+      color="success"
+      variant="outlined"
+      v-model="showAlert">
+      <template>
+      </template>
+      <span class="textAlert">Nova comanda afegida</span>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { getComandes, updateEstat } from "../services/communicationManager.js";
+import { funcionSockets } from "../services/socket-io.js";
 
 const comandes = ref([]);
 const search = ref("");
@@ -71,14 +81,22 @@ const estats = ref([
   'PREPARAT_PER_RECOLLIR',
   'RECOLLIT'
 ]);
-
+const showAlert = ref(false);  
 
 onMounted(async () => {
   loading.value = true;
   try {
     const response = await getComandes();
     if (Array.isArray(response.comandes)) {
-      comandes.value = response.comandes;
+      comandes.value = response.comandes.map(comanda => {
+        if (Array.isArray(comanda.Productes)) {
+          comanda.Productes = formatProductes(comanda.Productes);
+        } else {
+          console.error("La propiedad Productes no es un array en una de las comandes");
+        }
+        return comanda;
+      });
+      console.log(comandes.value);
     } else {
       console.error("El JSON de comandes no és un array");
     }
@@ -111,6 +129,7 @@ const filteredComandes = computed(() => {
     }));
 });
 
+
 const cambiarEstado = async (item) => {
   const currentStateIndex = estats.value.indexOf(item.Estat);
   const nextStateIndex = (currentStateIndex + 1) % estats.value.length;
@@ -122,5 +141,20 @@ const cambiarEstado = async (item) => {
     console.error("Error al actualizar el estado en la base de datos:", error);
   }
 };
+
+const formatProductes = (Productes) => {
+  return Productes.map(producto => {
+    return `${producto.idProducte} ${producto.nomProducte} ${producto.quantitat}`;
+  }).join(', ');
+};
+
+funcionSockets(comandes, formatProductes, showAlert);
 </script>
+<style>
+.textAlert{
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+</style>
 

@@ -186,6 +186,7 @@ app.get('/getProductesBD', (req, res) => {
 
 // Get Comandes Base de Dades
 app.get('/getComandesBD', (req, res) => {
+    console.log("hola");
     createConnection()
         .then(connection => {
             return connection.connect()
@@ -194,14 +195,30 @@ app.get('/getComandesBD', (req, res) => {
                 })
                 .then(([resultats]) => {
                     const response = {
-                        comandes: resultats.map(comandes => ({
-                            idComanda: comandes.idComanda,
-                            idUsuari: comandes.idUsuari,
-                            Productes: comandes.Productes,
-                            PreuTotal: parseFloat(comandes.PreuTotal),
-                            Estat: comandes.Estat,
-                            data: new Date(comandes.data).toISOString()
-                        }))
+                        comandes: resultats.map(comandes => {
+                            try {
+                                console.log('Contenido de Productes:', comandes.Productes);
+                                const productesParsed = comandes.Productes ? JSON.parse(comandes.Productes) : null;
+                                return {
+                                    idComanda: comandes.idComanda,
+                                    idUsuari: comandes.idUsuari,
+                                    Productes: productesParsed,
+                                    PreuTotal: parseFloat(comandes.PreuTotal),
+                                    Estat: comandes.Estat,
+                                    data: new Date(comandes.data).toISOString()
+                                };
+                            } catch (error) {
+                                console.error('Error parsing Productes:', error, 'Contenido:', comandes.Productes);
+                                return {
+                                    idComanda: comandes.idComanda,
+                                    idUsuari: comandes.idUsuari,
+                                    Productes: null, 
+                                    PreuTotal: parseFloat(comandes.PreuTotal),
+                                    Estat: comandes.Estat,
+                                    data: new Date(comandes.data).toISOString()
+                                };
+                            }
+                        })
                     };
                     res.json(response);
                 })
@@ -209,11 +226,12 @@ app.get('/getComandesBD', (req, res) => {
                     connection.end();
                 });
         })
-        .catch(error => {
-            console.error('Error fetching orders:', error);
-            res.status(500).send('Error fetching orders');
+        .catch(err => {
+            console.error('Error creating connection or executing query:', err);
+            res.status(500).send('Error interno del servidor');
         });
 });
+
 
 // Post Producte Base de Dades
 app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
@@ -472,10 +490,10 @@ app.post('/newComandesBD', async (req, res) => {
         const responseVue = {
             idComanda: result[0].idComanda,
             idUsuari: result[0].idUsuari,
-            Productes: result[0].Productes,
             PreuTotal: result[0].PreuTotal,
+            Productes: JSON.parse(result[0].Productes),
             Estat: result[0].Estat,
-            Data: result[0].data
+            data: result[0].data
         }
 
         // Preparar respuesta para enviar a través de Socket.IO y al cliente
