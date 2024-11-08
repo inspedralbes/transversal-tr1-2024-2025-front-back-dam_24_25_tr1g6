@@ -16,7 +16,7 @@
       <v-col cols="6" class="text-right">
         <v-select
           v-model="statusFilter"
-          :items="['Pendent de Preparar', 'En Preparació', 'Preparat per recollir', 'Recollit']"
+          :items="['PENDENT_PER_PREPARACIO', 'EN_PREPARACIO', 'PREPARAT_PER_RECOLLIR', 'RECOLLIT']"
           label="Filtrar per Estat"
           prepend-icon="mdi-filter"
           dense
@@ -27,6 +27,7 @@
       </v-col>
     </v-row>
   </v-container>
+
   <v-container>
     <v-row>
       <v-col>
@@ -37,10 +38,16 @@
           <v-card-text>
             <v-data-table
               :headers="headers"
-              :items="filteredComandes"
+              :items="filteredComandes" 
               :loading="loading"
               class="elevation-1"
               hide-default-footer>
+              <template v-slot:item.Estat="{item}">
+                <v-btn
+                  @click="cambiarEstado(item)">
+                  {{item.Estat}}
+                </v-btn>
+              </template>
             </v-data-table>
           </v-card-text>
         </v-card>
@@ -51,13 +58,19 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getComandes } from "../services/communicationManager.js";
+import { getComandes, updateEstat } from "../services/communicationManager.js";
 
 const comandes = ref([]);
 const search = ref("");
 const statusFilter = ref(null); 
 const loading = ref(false);
 const error = ref(null);
+const estats = ref([
+  'PENDENT_PER_PREPARACIO',
+  'EN_PREPARACIO',
+  'PREPARAT_PER_RECOLLIR',
+  'RECOLLIT'
+]);
 
 
 onMounted(async () => {
@@ -77,14 +90,13 @@ onMounted(async () => {
   }
 });
 
-
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}/${month}/${year}`; 
-}
+};
 
 const filteredComandes = computed(() => {
   return comandes.value
@@ -99,4 +111,16 @@ const filteredComandes = computed(() => {
     }));
 });
 
+const cambiarEstado = async (item) => {
+  const currentStateIndex = estats.value.indexOf(item.Estat);
+  const nextStateIndex = (currentStateIndex + 1) % estats.value.length;
+  item.Estat = estats.value[nextStateIndex];
+  
+  try {
+    await updateEstat(item.idComanda, item.Estat); 
+  } catch (error) {
+    console.error("Error al actualizar el estado en la base de datos:", error);
+  }
+};
 </script>
+

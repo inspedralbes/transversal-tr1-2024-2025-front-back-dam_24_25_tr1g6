@@ -186,7 +186,6 @@ app.get('/getProductesBD', (req, res) => {
 
 // Get Comandes Base de Dades
 app.get('/getComandesBD', (req, res) => {
-    console.log("hola");
     createConnection()
         .then(connection => {
             return connection.connect()
@@ -500,18 +499,21 @@ app.put('/putEstatBD/:id', async (req, res) => {
     const idComanda = parseInt(req.params.id);
     const { Estat } = req.body;
 
-    const connection = await createConnection();
-
     try {
-        await connection.execute(`UPDATE comandes SET Estat = ? WHERE idComanda = ?`,
-        [Estat, idComanda]);
+        const connection = await createConnection();
+        console.log("Conexión a la base de datos establecida");
 
-        io.emit("update-estat", JSON.stringify({ "idComanda": idComanda, "Estat": Estat }))
+        await connection.execute(
+            `UPDATE comandes SET Estat = ? WHERE idComanda = ?`, 
+            [Estat, idComanda]
+        );
+
+        io.emit("update-estat", JSON.stringify({ "idComanda": idComanda, "Estat": Estat }));
+
         res.json({ message: "Actualitzat l'estat de la comanda" });
     } catch (error) {
-        res.json({ message: "No s'actualitzat l'estat de la comanda"});
-    } finally {
-        connection.end();
+        console.error("Error al actualizar el estado en la base de datos:", error);
+        res.json({ message: "No s'actualitzat l'estat de la comanda" });
     }
 });
 
