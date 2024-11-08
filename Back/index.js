@@ -389,9 +389,9 @@ app.post('/RegisterBD', async (req, res) => {
     try {
         // Ejecutar la inserción
         const [result] = await connection.execute(
-            `INSERT INTO usuari (Nom, Correu, Contrasenya, Targeta, Admin) 
-            VALUES (?, ?, ?, ?, ?)`,
-            [Nom, Correu, Contrasenya, 0, 0]
+            `INSERT INTO usuari (Nom, Correu, Contrasenya) 
+            VALUES (?, ?, ?)`,
+            [Nom, Correu, Contrasenya]
         );
 
         const idUser = result.insertId;
@@ -400,7 +400,6 @@ app.post('/RegisterBD', async (req, res) => {
             Nom: Nom,
             Correu: Correu,
             Contrasenya: Contrasenya,
-            Targeta: 0,
             Confirmacio: true
         };
 
@@ -420,7 +419,7 @@ app.post('/loginBD', async (req, res) => {
 
     const connection = await createConnection();
 
-    console.log("Correu: " + Correu + "Contrasenya " + Contrasenya)
+    console.log("Correu: " + Correu + " Contrasenya: " + Contrasenya)
 
     try {
         const [usuari] = await connection.execute(`SELECT * FROM usuari WHERE Correu = ? AND Contrasenya = ?`, [Correu, Contrasenya]);
@@ -429,7 +428,6 @@ app.post('/loginBD', async (req, res) => {
             Nom: usuari[0].Nom,
             Correu: usuari[0].Correu,
             Contrasenya: usuari[0].Contrasenya,
-            Targeta: usuari[0].Targeta,
             Confirmacio: true
         }
 
