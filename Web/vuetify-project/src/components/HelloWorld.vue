@@ -19,7 +19,7 @@
   text-align: center;
 }
 .background {
-  background-color: #f5f5f596; 
+  background-color: rgb(255, 251, 230); 
   min-height: 100vh; 
 }
 .text2{
