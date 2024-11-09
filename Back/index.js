@@ -132,15 +132,15 @@ app.post('/postProducte', (req, res) => {
 // Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
-        host: 'dam.inspedralbes.cat',
-        user: 'a21rublormar_admin',
-        password: 'InsPedralbes2024',
-        database: 'a21rublormar_TR1_GR6'
-        // host: 'localhost',
-        // user: 'root',
-        // password: '',
-        // database: 'a21rublormar_TR1_GR6',
-        // port: 3306
+        // host: 'dam.inspedralbes.cat',
+        // user: 'a21rublormar_admin',
+        // password: 'InsPedralbes2024',
+        // database: 'a21rublormar_TR1_GR6'
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'a21rublormar_TR1_GR6',
+        port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -457,11 +457,10 @@ app.post('/loginBD', async (req, res) => {
 });
 
 app.put('/updatePerfil/:id', async (req, res) => {
-
-    console.log("updateUser" + "idUsuari: " + idUsuari + "Nom: " + Nom + "Correu: " + Correu + "Contrasenya: " + Contrasenya);
     const idUsuari = parseInt(req.params.id);
     const { Nom, Correu, Contrasenya } = req.body;
 
+    console.log("updateUser " + " idUsuari: " + idUsuari + " Nom: " + Nom + " Correu: " + Correu + " Contrasenya: " + Contrasenya);
     const connection = await createConnection();
 
     try {
