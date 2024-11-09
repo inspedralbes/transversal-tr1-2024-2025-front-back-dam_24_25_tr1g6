@@ -10,6 +10,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const multer = require('multer');
 const { error } = require('console');
+const { spawn } = require('child_process');
 app.use(express.json());
 app.use(cors());
 
@@ -132,15 +133,15 @@ app.post('/postProducte', (req, res) => {
 // Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
-        host: 'dam.inspedralbes.cat',
-        user: 'a21rublormar_admin',
-        password: 'InsPedralbes2024',
-        database: 'a21rublormar_TR1_GR6'
-        // host: 'localhost',
-        // user: 'root',
-        // password: '',
-        // database: 'a21rublormar_TR1_GR6',
-        // port: 3306
+        // host: 'dam.inspedralbes.cat',
+        // user: 'a21rublormar_admin',
+        // password: 'InsPedralbes2024',
+        // database: 'a21rublormar_TR1_GR6'
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'a21rublormar_TR1_GR6',
+        port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -212,7 +213,7 @@ app.get('/getComandesBD', (req, res) => {
                                 return {
                                     idComanda: comandes.idComanda,
                                     idUsuari: comandes.idUsuari,
-                                    Productes: null, 
+                                    Productes: null,
                                     PreuTotal: parseFloat(comandes.PreuTotal),
                                     Estat: comandes.Estat,
                                     data: new Date(comandes.data).toISOString()
@@ -245,7 +246,7 @@ app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
     const connection = await createConnection();
     const imatgePath = req.file ? req.file.path : null;
     const imatge = imatgePath ? path.basename(imatgePath) : null;
-    
+
 
     return connection.execute(
         `INSERT INTO producte (nomProducte, Descripcio, Preu, Stock, Imatge, Activat) 
@@ -378,7 +379,7 @@ app.get('/getHistorialComandes/:id', async (req, res) => {
 
     try {
         const [resultats] = await connection.execute('SELECT * FROM comandes WHERE idUsuari = ?', [idUsuari]);
-        
+
         const response = {
             Comandes: resultats.map(comanda => ({
                 idComanda: comanda.idComanda,
@@ -388,7 +389,7 @@ app.get('/getHistorialComandes/:id', async (req, res) => {
                 Estat: comanda.Estat
             }))
         };
-        
+
         res.json(response);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -473,7 +474,7 @@ app.post('/newComandesBD', async (req, res) => {
     try {
         const ProductesText = JSON.stringify(Productes);
 
-        const [resultComanda] = await connection.execute('INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) VALUES (?, ?, ?, ?)', 
+        const [resultComanda] = await connection.execute('INSERT INTO comandes (idUsuari, Productes, PreuTotal, data) VALUES (?, ?, ?, ?)',
             [idUsuari, ProductesText, PreuTotal, dataActual()]);
 
         const idComanda = resultComanda.insertId;
@@ -482,7 +483,7 @@ app.post('/newComandesBD', async (req, res) => {
 
         for (const element of Productes) {
             await connection.execute(
-                `UPDATE producte SET Stock = GREATEST(Stock - ?, 0) WHERE idProducte = ?`, 
+                `UPDATE producte SET Stock = GREATEST(Stock - ?, 0) WHERE idProducte = ?`,
                 [element.quantitat, element.idProducte]
             );
         }
@@ -522,7 +523,7 @@ app.put('/putEstatBD/:id', async (req, res) => {
         console.log("Conexión a la base de datos establecida");
 
         await connection.execute(
-            `UPDATE comandes SET Estat = ? WHERE idComanda = ?`, 
+            `UPDATE comandes SET Estat = ? WHERE idComanda = ?`,
             [Estat, idComanda]
         );
 
@@ -535,7 +536,7 @@ app.put('/putEstatBD/:id', async (req, res) => {
     }
 });
 
-app.get('/statistics-clients', async (req, res) => {
+app.get('/stadistics-clients', async (req, res) => {
     const connection = await createConnection();
 
     try {
@@ -558,8 +559,13 @@ app.get('/statistics-clients', async (req, res) => {
     }
 });
 
-app.get('/statistics-client', async (req, res) => {
-    const { Correu } = req.query;
+
+app.post('/estadistiques-client', async (req, res) => {
+    const { Correu } = req.body;
+
+    if (!Correu) {
+        return res.status(400).json({ message: "Correu és requerit" });
+    }
 
     const connection = await createConnection();
 
@@ -571,10 +577,40 @@ app.get('/statistics-client', async (req, res) => {
         }
 
         const idUsuari = idUsuariResult[0].idUser;
-        
+
         const [rows] = await connection.execute('SELECT * FROM comandes WHERE idUsuari = ?', [idUsuari]);
-        
-        res.json(rows);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "No hi ha comandes per aquest usuari" });
+        }
+
+        const rowsJson = JSON.stringify(rows);
+
+        // Guardar los datos en un archivo temporal
+        const tempFilePath = path.join(__dirname, 'python', 'temp_data.json');
+        require('fs').writeFileSync(tempFilePath, rowsJson);
+
+        // Llamar al script de Python usando spawn y enviar el correo como argumento
+        const scriptPath = path.join(__dirname, 'python', 'client.py');
+        const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
+
+        let pythonOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            pythonOutput += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Error en el script de Python: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                return res.status(500).json({ message: "Error generando gráficos" });
+            }
+
+            const imagePath = pythonOutput.trim();
+            res.json({ success: true, imagePaths: [imagePath] });
+        });
     } catch (error) {
         console.error("Error en executar la consulta: ", error);
         res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });

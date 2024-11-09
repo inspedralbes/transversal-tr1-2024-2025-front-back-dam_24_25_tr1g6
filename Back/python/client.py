@@ -1,50 +1,9 @@
-import requests
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import os # No eliminar
-
-# Definir la URL base de l'API
-# API_URL = "http://localhost:3010/statistics-client"
-API_URL = "http://juicengo.dam.inspedralbes.cat:20871/statistics-client"
-
-# Funció per obtenir les comandes (vendes) d'un client basant-se en el seu correu
-def obtenir_comandes_per_correu(correu):
-    try:
-        # Realitzar la sol·licitud GET amb el correu com a paràmetre
-        response = requests.get(API_URL, params={'Correu': correu})
-        
-        # Comprovar si la sol·licitud ha estat exitosa
-        if response.status_code != 200:
-            print(f"Error al obtenir les comandes: {response.text}")
-            return None
-        
-        # Convertir la resposta JSON a un DataFrame
-        data = response.json()
-        
-        # Comprovar si s'han rebut dades
-        if 'message' in data:
-            print(f"Error: {data['message']}")
-            return None
-
-        # Convertir les dades de les comandes a un DataFrame
-        df_comandes = pd.DataFrame(data)
-        
-        # Comprovar si el DataFrame no està buit
-        if df_comandes.empty:
-            print("No es va trobar comandes d'aquest client.")
-            return None
-
-        return df_comandes
-
-    except requests.exceptions.RequestException as e:
-        # Capturar errors relacionats amb la connexió
-        print(f"Error en la connexió amb l'API: {e}")
-        return None
-    except Exception as e:
-        # Capturar qualsevol altre error
-        print(f"S'ha produït un error inesperat: {e}")
-        return None
+import os  # No eliminar
+import json
 
 # Funció per crear el gràfic de barres de l'historial de vendes d'un client
 def crear_grafic_historial_vendes(df_comandes):
@@ -100,25 +59,41 @@ def crear_grafic_historial_vendes(df_comandes):
         plt.tight_layout()
 
         # Crear la carpeta 'Grafiques' si no existeix
-        # if not os.path.exists('Grafiques'):
-        #    os.makedirs('Grafiques')
+        if not os.path.exists('Grafiques'):
+            os.makedirs('Grafiques')
 
         # Guardar el gràfic com a imatge a la carpeta 'Grafiques'
-        # plt.savefig('Grafiques/historial_vendes_del_client.png')  # Nom de la imatge
+        output_path = 'Grafiques/historial_vendes_del_client.png'
+        plt.savefig(output_path)  # Nom de la imatge
 
         # Mostrar el gràfic
         plt.show()
 
+        # Retornar la ruta de la imatge
+        return output_path
+
     except Exception as e:
         # Capturar errors al crear el gràfic
         print(f"S'ha produït un error en crear el gràfic: {e}")
+        return None
 
-# Sol·licitar al usuari el correu del client
-correu_cliente = input("Introdueix el correu del client: ")
+# Comprovar que s'ha passat l'argument del fitxer temporal
+if len(sys.argv) < 2:
+    print("Error: Falta l'argument del fitxer temporal")
+    sys.exit(1)
 
-# Obtenir les comandes del client
-df_comandes = obtenir_comandes_per_correu(correu_cliente)
+# Obtenir la ruta del fitxer temporal del primer argument
+temp_file_path = sys.argv[1]
+
+# Llegir les dades del fitxer temporal
+with open(temp_file_path, 'r') as file:
+    data = json.load(file)
+
+# Convertir les dades de les comandes a un DataFrame
+df_comandes = pd.DataFrame(data)
 
 # Si s'han obtingut comandes, crear el gràfic
-if df_comandes is not None:
-    crear_grafic_historial_vendes(df_comandes)
+if not df_comandes.empty:
+    output_path = crear_grafic_historial_vendes(df_comandes)
+    if output_path:
+        print(output_path)

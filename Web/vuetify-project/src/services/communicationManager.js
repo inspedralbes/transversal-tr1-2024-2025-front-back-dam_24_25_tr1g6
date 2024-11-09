@@ -122,4 +122,20 @@ export async function updateEstat(idComanda, Estat) {
     }
 }
 
+export async function estadisticasPython(correu) {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_URL_BACK}/estadistiques-client`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ Correu: correu })
+        });
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error("Error en la comunicación con el servidor:", err); // Error de red
+        throw err;
+    }
+}
 

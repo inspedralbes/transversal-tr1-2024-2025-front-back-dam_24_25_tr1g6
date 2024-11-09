@@ -51,10 +51,10 @@ CREATE TABLE `comandes` (
     `Productes` text NOT NULL,
     `PreuTotal` decimal(10, 2) NOT NULL,
     `Estat` enum(
-        'Pendent de preparar',
-        'En preparació',
-        'Preparat per recollir',
-        'Recollit'
+        'PENDENT_DE_PREPARAR',
+        'EN_PREPARACIO',
+        'PREPARAT_PER_ENVIAR',
+        'RECOLLIT'
     ) CHARACTER SET utf8mb4 NOT NULL,
     `data` date NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
