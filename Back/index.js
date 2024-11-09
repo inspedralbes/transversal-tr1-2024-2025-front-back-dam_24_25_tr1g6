@@ -398,7 +398,7 @@ app.get('/getHistorialComandes/:id', async (req, res) => {
     }
 });
 
-app.post('/RegisterBD', async (req, res) => {
+app.post('/registerBD', async (req, res) => {
     const { Nom, Correu, Contrasenya } = req.body;
 
     const connection = await createConnection();
@@ -421,7 +421,7 @@ app.post('/RegisterBD', async (req, res) => {
         };
 
         console.log("Usuari afegit: ", newUsuari);
-        res.json(JSON.stringify(newUsuari));
+        res.json(newUsuari);
 
     } catch (error) {
         console.error('Error afegint usuari:', error);
