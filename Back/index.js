@@ -132,15 +132,15 @@ app.post('/postProducte', (req, res) => {
 // Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
-        // host: 'dam.inspedralbes.cat',
-        // user: 'a21rublormar_admin',
-        // password: 'InsPedralbes2024',
-        // database: 'a21rublormar_TR1_GR6'
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'a21rublormar_TR1_GR6',
-        port: 3306
+        host: 'dam.inspedralbes.cat',
+        user: 'a21rublormar_admin',
+        password: 'InsPedralbes2024',
+        database: 'a21rublormar_TR1_GR6'
+        // host: 'localhost',
+        // user: 'root',
+        // password: '',
+        // database: 'a21rublormar_TR1_GR6',
+        // port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -195,14 +195,30 @@ app.get('/getComandesBD', (req, res) => {
                 })
                 .then(([resultats]) => {
                     const response = {
-                        comandes: resultats.map(comandes => ({
-                            idComanda: comandes.idComanda,
-                            idUsuari: comandes.idUsuari,
-                            Productes: comandes.Productes,
-                            PreuTotal: parseFloat(comandes.PreuTotal),
-                            Estat: comandes.Estat,
-                            data: new Date(comandes.data).toISOString()
-                        }))
+                        comandes: resultats.map(comandes => {
+                            try {
+                                console.log('Contenido de Productes:', comandes.Productes);
+                                const productesParsed = comandes.Productes ? JSON.parse(comandes.Productes) : null;
+                                return {
+                                    idComanda: comandes.idComanda,
+                                    idUsuari: comandes.idUsuari,
+                                    Productes: productesParsed,
+                                    PreuTotal: parseFloat(comandes.PreuTotal),
+                                    Estat: comandes.Estat,
+                                    data: new Date(comandes.data).toISOString()
+                                };
+                            } catch (error) {
+                                console.error('Error parsing Productes:', error, 'Contenido:', comandes.Productes);
+                                return {
+                                    idComanda: comandes.idComanda,
+                                    idUsuari: comandes.idUsuari,
+                                    Productes: null, 
+                                    PreuTotal: parseFloat(comandes.PreuTotal),
+                                    Estat: comandes.Estat,
+                                    data: new Date(comandes.data).toISOString()
+                                };
+                            }
+                        })
                     };
                     res.json(response);
                 })
@@ -210,11 +226,12 @@ app.get('/getComandesBD', (req, res) => {
                     connection.end();
                 });
         })
-        .catch(error => {
-            console.error('Error fetching orders:', error);
-            res.status(500).send('Error fetching orders');
+        .catch(err => {
+            console.error('Error creating connection or executing query:', err);
+            res.status(500).send('Error interno del servidor');
         });
 });
+
 
 // Post Producte Base de Dades
 app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
@@ -381,7 +398,7 @@ app.get('/getHistorialComandes/:id', async (req, res) => {
     }
 });
 
-app.post('/RegisterBD', async (req, res) => {
+app.post('/registerBD', async (req, res) => {
     const { Nom, Correu, Contrasenya } = req.body;
 
     const connection = await createConnection();
@@ -389,9 +406,9 @@ app.post('/RegisterBD', async (req, res) => {
     try {
         // Ejecutar la inserción
         const [result] = await connection.execute(
-            `INSERT INTO usuari (Nom, Correu, Contrasenya, Targeta, Admin) 
-            VALUES (?, ?, ?, ?, ?)`,
-            [Nom, Correu, Contrasenya, 0, 0]
+            `INSERT INTO usuari (Nom, Correu, Contrasenya) 
+            VALUES (?, ?, ?)`,
+            [Nom, Correu, Contrasenya]
         );
 
         const idUser = result.insertId;
@@ -400,12 +417,11 @@ app.post('/RegisterBD', async (req, res) => {
             Nom: Nom,
             Correu: Correu,
             Contrasenya: Contrasenya,
-            Targeta: 0,
             Confirmacio: true
         };
 
         console.log("Usuari afegit: ", newUsuari);
-        res.json(JSON.stringify(newUsuari));
+        res.json(newUsuari);
 
     } catch (error) {
         console.error('Error afegint usuari:', error);
@@ -420,7 +436,7 @@ app.post('/loginBD', async (req, res) => {
 
     const connection = await createConnection();
 
-    console.log("Correu: " + Correu + "Contrasenya " + Contrasenya)
+    console.log("Correu: " + Correu + " Contrasenya: " + Contrasenya)
 
     try {
         const [usuari] = await connection.execute(`SELECT * FROM usuari WHERE Correu = ? AND Contrasenya = ?`, [Correu, Contrasenya]);
@@ -429,7 +445,6 @@ app.post('/loginBD', async (req, res) => {
             Nom: usuari[0].Nom,
             Correu: usuari[0].Correu,
             Contrasenya: usuari[0].Contrasenya,
-            Targeta: usuari[0].Targeta,
             Confirmacio: true
         }
 
@@ -495,10 +510,10 @@ app.post('/newComandesBD', async (req, res) => {
         const responseVue = {
             idComanda: result[0].idComanda,
             idUsuari: result[0].idUsuari,
-            Productes: result[0].Productes,
             PreuTotal: result[0].PreuTotal,
+            Productes: JSON.parse(result[0].Productes),
             Estat: result[0].Estat,
-            Data: result[0].data
+            data: result[0].data
         }
 
         // Preparar respuesta para enviar a través de Socket.IO y al cliente
@@ -522,20 +537,72 @@ app.put('/putEstatBD/:id', async (req, res) => {
     const idComanda = parseInt(req.params.id);
     const { Estat } = req.body;
 
+    try {
+        const connection = await createConnection();
+        console.log("Conexión a la base de datos establecida");
+
+        await connection.execute(
+            `UPDATE comandes SET Estat = ? WHERE idComanda = ?`, 
+            [Estat, idComanda]
+        );
+
+        io.emit("update-estat", JSON.stringify({ "idComanda": idComanda, "Estat": Estat }));
+
+        res.json({ message: "Actualitzat l'estat de la comanda" });
+    } catch (error) {
+        console.error("Error al actualizar el estado en la base de datos:", error);
+        res.json({ message: "No s'actualitzat l'estat de la comanda" });
+    }
+});
+
+app.get('/statistics-clients', async (req, res) => {
     const connection = await createConnection();
 
     try {
-        await connection.execute(`UPDATE comandes SET Estat = ? WHERE idComanda = ?`,
-            [Estat, idComanda]);
+        const [rows] = await connection.execute(`
+            SELECT idUsuari AS ID, u.Nom AS Clients,
+                   COUNT(c.idComanda) AS Ventes,
+                   SUM(c.PreuTotal) AS Diners,
+                   AVG(c.PreuTotal) AS \`Diners/venda\`
+            FROM usuari u
+            JOIN comandes c ON u.idUser = c.idUsuari
+            GROUP BY u.Nom;
+        `);
 
-        io.emit("update-estat", JSON.stringify({ "idComanda": idComanda, "Estat": Estat }))
-        res.json({ message: "Actualitzat l'estat de la comanda" });
+        res.json(rows);
     } catch (error) {
-        res.json({ message: "No s'actualitzat l'estat de la comanda" });
+        console.error("Error al ejecutar la consulta:", error);
+        res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
     } finally {
         connection.end();
     }
 });
+
+app.get('/statistics-client', async (req, res) => {
+    const { Correu } = req.query;
+
+    const connection = await createConnection();
+
+    try {
+        const [idUsuariResult] = await connection.execute(`SELECT idUser FROM usuari WHERE Correu = ?`, [Correu]);
+
+        if (idUsuariResult.length === 0) {
+            return res.status(404).json({ message: "Usuari no trobat" });
+        }
+
+        const idUsuari = idUsuariResult[0].idUser;
+        
+        const [rows] = await connection.execute('SELECT * FROM comandes WHERE idUsuari = ?', [idUsuari]);
+        
+        res.json(rows);
+    } catch (error) {
+        console.error("Error en executar la consulta: ", error);
+        res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
+    } finally {
+        connection.end();
+    }
+});
+
 
 // Iniciar el servidor
 server.listen(PORT, () => {

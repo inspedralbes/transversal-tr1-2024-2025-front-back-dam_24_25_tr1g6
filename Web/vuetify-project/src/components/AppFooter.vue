@@ -14,7 +14,6 @@
         :size="item.icon === '$vuetify' ? 24 : 16"
       />
     </a>
-
     <div
       class="text-caption text-disabled"
       style="position: absolute; right: 16px;"
