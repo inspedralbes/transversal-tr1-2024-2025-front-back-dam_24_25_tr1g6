@@ -1,56 +1,76 @@
 <template>
-  <div class="container-principal">
-    <div class="container-left">
-      <h2>Estadistiques d'un Client</h2>
-      <v-text-field
-        v-model="email"
-        label="Correu electrònic"
-        outlined
-        class="input-field"
-      ></v-text-field>
+  <v-app class="background">
+    <v-container class="container-principal" fluid>
+      <v-row justify="center">
+        <v-col cols="12">
+          <h1 class="text-center">Estadistiques</h1>
+        </v-col>
+      </v-row>
 
-      <v-btn @click="obtenerEstadisticas" :disabled="!email" class="action-btn">
-        Veure Estadistiques
-      </v-btn>
+      <!-- Fila general que contiene las dos secciones -->
+      <v-row justify="center">
+        <!-- Sección de estadísticas de un cliente -->
+        <v-col cols="12" md="5" class="container-left">
+          <h2>Estadistiques d'un Client</h2>
+          <v-text-field
+            v-model="email"
+            label="Escriu Correu electrònic"
+            outlined
+            class="input-field"
+          ></v-text-field>
 
-      <!-- Mostrar el indicador de carga si está cargando -->
-      <div v-if="loading" class="loading-indicator">
-        <v-progress-circular
-          indeterminate
-          color="primary"
-        ></v-progress-circular>
-        <p>Generant estadistica...</p>
-      </div>
+          <v-btn
+            @click="obtenerEstadisticas"
+            :disabled="!email"
+            class="action-btn"
+          >
+            Veure Estadistiques
+          </v-btn>
 
-      <!-- Mostrar la imagen generada solo si está disponible -->
-      <div v-if="imagePaths && !loading" class="image-container">
-        <img :src="imagePaths" alt="Estadísticas del cliente" />
-      </div>
-    </div>
-    <div class="container-right">
-      <h2>Estadistiques generals dels Clients</h2>
+          <!-- Mostrar el indicador de carga si está cargando -->
+          <div v-if="loading" class="loading-indicator">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+            ></v-progress-circular>
+            <p>Generant estadistica...</p>
+          </div>
 
-      <v-btn @click="obtenerEstadisticasClientes" class="action-btn">
-        Veure Estadistiques
-      </v-btn>
+          <!-- Mostrar la imagen generada solo si está disponible -->
+          <div v-if="imagePaths && !loading" class="image-container">
+            <img :src="imagePaths" alt="Estadísticas del cliente" />
+          </div>
+        </v-col>
 
-      <!-- Mostrar el indicador de carga si está cargando -->
-      <div v-if="loadingClientes" class="loading-indicator">
-        <v-progress-circular
-          indeterminate
-          color="primary"
-        ></v-progress-circular>
-        <p>Generant estadistica...</p>
-      </div>
+        <!-- Sección de estadísticas generales de los clientes -->
+        <v-col cols="12" md="5" class="container-right">
+          <h2>Estadistiques generals dels Clients</h2>
+          <v-btn @click="obtenerEstadisticasClientes" class="action-btn">
+            Veure Estadistiques
+          </v-btn>
 
-      <!-- Mostrar la imagen generada solo si está disponible -->
-      <div v-if="imagePathsClients && !loadingClientes" class="image-container">
-        <img :src="imagePathsClients" alt="Estadísticas del cliente" />
-      </div>
-    </div>
-  </div>
+          <!-- Mostrar el indicador de carga si está cargando -->
+          <div v-if="loadingClientes" class="loading-indicator">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+            ></v-progress-circular>
+            <p>Generant estadistica...</p>
+          </div>
+
+          <!-- Mostrar la imagen generada solo si está disponible -->
+          <div
+            v-if="imagePathsClients && !loadingClientes"
+            class="image-container"
+          >
+            <img :src="imagePathsClients" alt="Estadísticas generales" />
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>
 </template>
-  
+
 <script>
 import { ref } from "vue"; // Importa ref para declarar las variables reactivas
 import {
@@ -142,16 +162,14 @@ export default {
   },
 };
 </script>
-  
+
 <style scoped>
 .container-principal {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
   margin-top: 50px;
-  width: 100%;
 }
-.container-left {
+
+.container-left,
+.container-right {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -159,12 +177,14 @@ export default {
 }
 
 .input-field {
-  width: 300px; /* Ajusta el tamaño del input */
+  width: 250px; /* Ajusta el tamaño del input */
+  height: 70px;
   margin-bottom: 20px;
 }
 
 .action-btn {
   margin-bottom: 20px;
+  background-color: #ffbb64;
 }
 
 .loading-indicator {
@@ -177,5 +197,9 @@ export default {
   max-width: 800px; /* Ajusta el tamaño de la imagen */
   width: 100%; /* Mantener la imagen responsiva */
   margin-top: 20px;
+}
+
+.background {
+  background-color: rgb(255, 251, 230);
 }
 </style>
