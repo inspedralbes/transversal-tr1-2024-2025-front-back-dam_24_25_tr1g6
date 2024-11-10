@@ -15,6 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')));
+app.use('/grafiques', express.static(path.join(__dirname, 'grafiques')));
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
@@ -536,7 +537,8 @@ app.put('/putEstatBD/:id', async (req, res) => {
     }
 });
 
-app.get('/stadistics-clients', async (req, res) => {
+
+app.get('/estadistiques-clients', async (req, res) => {
     const connection = await createConnection();
 
     try {
@@ -550,7 +552,40 @@ app.get('/stadistics-clients', async (req, res) => {
             GROUP BY u.Nom;
         `);
 
-        res.json(rows);
+        console.log("rows", rows);
+
+        const rowsJson = JSON.stringify(rows);
+
+
+        // Guardar los datos en un archivo temporal
+        const tempFilePath = path.join(__dirname, 'python', 'temp_dataClients.json');
+        require('fs').writeFileSync(tempFilePath, rowsJson);
+
+        // Llamar al script de Python usando spawn y enviar la ruta del archivo temporal como argumento
+        const scriptPath = path.join(__dirname, 'python', 'pruebaClients.py');
+        const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
+
+        let pythonOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            pythonOutput += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Error en el script de Python: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                return res.status(500).json({ message: "Error generando gráficos" });
+            }
+
+            const imagePath = pythonOutput.trim();
+            res.json({ success: true, imagePaths: [imagePath] });
+
+            // Eliminar el archivo temporal
+            require('fs').unlinkSync(tempFilePath);
+        });
     } catch (error) {
         console.error("Error al ejecutar la consulta:", error);
         res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
@@ -586,7 +621,7 @@ app.post('/estadistiques-client', async (req, res) => {
         const rowsJson = JSON.stringify(rows);
 
         // Guardar los datos en un archivo temporal
-        const tempFilePath = path.join(__dirname, 'python', 'temp_data.json');
+        const tempFilePath = path.join(__dirname, 'python', 'temp_dataClient.json');
         require('fs').writeFileSync(tempFilePath, rowsJson);
 
         // Llamar al script de Python usando spawn y enviar el correo como argumento
@@ -608,7 +643,9 @@ app.post('/estadistiques-client', async (req, res) => {
                 return res.status(500).json({ message: "Error generando gráficos" });
             }
 
-            const imagePath = pythonOutput.trim();
+            // Asegúrate de que pythonOutput sea la ruta completa de la imagen
+            const imagePath = path.join(pythonOutput.trim());
+            console.log("imagePath", imagePath);
             res.json({ success: true, imagePaths: [imagePath] });
         });
     } catch (error) {
@@ -618,6 +655,7 @@ app.post('/estadistiques-client', async (req, res) => {
         connection.end();
     }
 });
+
 
 
 // Iniciar el servidor

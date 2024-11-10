@@ -5,7 +5,7 @@ import os # No eliminar
 
 # Definir la URL base de l'API
 # API_URL = "http://localhost:3010/statistics-clients"
-API_URL = "http://juicengo.dam.inspedralbes.cat:20871/statistics-clients"
+API_URL = "http://juicengo.dam.inspedralbes.cat:20871/estadistiques-clients"
 
 def obtenir_dades_estadistiques():
     """
@@ -79,12 +79,12 @@ def crear_imatge_dades_vendes(df_promedio):
         dibuixar.text((10, 10), text_complet, font=font, fill='black')
 
         # Crear la carpeta 'Grafiques' si no existeix
-        # if not os.path.exists('Grafiques'):
-        #    os.makedirs('Grafiques')
+        if not os.path.exists('grafiques'):
+           os.makedirs('grafiques')
         
         # Guardar la imatge
-        # imatge.save('Grafiques/dades_vendes_clients.png')
-        # print("Imatge guardada correctament a 'Grafiques/dades_vendes_clients.png'")
+        imatge.save('grafiques/dades_vendes_clients.png')
+        print("Imatge guardada correctament a 'grafiques/dades_vendes_clients.png'")
 
     except Exception as e:
         # Capturar qualsevol error en la creació de la imatge

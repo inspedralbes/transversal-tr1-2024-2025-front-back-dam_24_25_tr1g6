@@ -59,11 +59,11 @@ def crear_grafic_historial_vendes(df_comandes):
         plt.tight_layout()
 
         # Crear la carpeta 'Grafiques' si no existeix
-        if not os.path.exists('Grafiques'):
-            os.makedirs('Grafiques')
+        if not os.path.exists('grafiques'):
+            os.makedirs('grafiques')
 
         # Guardar el gràfic com a imatge a la carpeta 'Grafiques'
-        output_path = 'Grafiques/historial_vendes_del_client.png'
+        output_path = 'grafiques/historial_vendes_del_client.png'
         plt.savefig(output_path)  # Nom de la imatge
 
         # Mostrar el gràfic
