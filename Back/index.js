@@ -17,7 +17,7 @@ app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*",
+        origin: ["http://juicengo.dam.inspedralbes.cat:20871","http://localhost:3010"],
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
@@ -357,8 +357,7 @@ app.post('/loginBD', async (req, res) => {
 app.put('/updatePerfil/:id', async (req, res) => {
     const idUsuari = parseInt(req.params.id);
     const { Nom, Correu, Contrasenya } = req.body;
-
-    console.log("updateUser " + " idUsuari: " + idUsuari + " Nom: " + Nom + " Correu: " + Correu + " Contrasenya: " + Contrasenya);
+    
     const connection = await createConnection();
 
     try {
