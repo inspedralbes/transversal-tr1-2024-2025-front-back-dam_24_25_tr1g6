@@ -16,15 +16,14 @@
       </v-col>
       <v-col cols="6" class="text-right">
         <v-select
+          solo background-color='primary'
           v-model="statusFilter"
           :items="['PENDENT_PER_PREPARACIO', 'EN_PREPARACIO', 'PREPARAT_PER_RECOLLIR', 'RECOLLIT']"
           label="Filtrar per Estat"
           prepend-icon="mdi-filter"
           dense
-          outlined
-          @change="totesLesComandes"
-          hide-details
-        ></v-select>
+          outlined>
+        </v-select>
       </v-col>
     </v-row>
   </v-container>
@@ -32,10 +31,10 @@
     <v-row>
       <v-col>
         <v-card>
-          <v-card-title>
+          <v-card-title class="asd">
             <h2 class="tit">Comandes</h2>
           </v-card-title>
-          <v-card-text>
+          <v-card-text class="asd">
             <v-data-table
               :headers="headers"
               :items="filteredComandes" 
@@ -43,7 +42,8 @@
               loading-text="Buscant informació"
               class="elevation-1"
               no-data-text="No hi ha comandes disponibles"
-              hide-default-footer>
+              hide-default-footer
+              id="asd">
               <template v-slot:item.Estat="{item}">
                 <v-btn
                   :style="getButtonStyle(item.Estat)"
@@ -168,7 +168,7 @@ const formatProductes = (Productes) => {
 
 funcionSockets(comandes, formatProductes, showAlert);
 </script>
-<style>
+<style scoped>
 .textAlert{
   text-align: center;
   display: block;
@@ -180,6 +180,12 @@ funcionSockets(comandes, formatProductes, showAlert);
 .tit{
   color: rgb(255, 187, 100);
   text-shadow: 1px 1px 2px rgb(0, 0, 0); 
+}
+.asd{
+  background-color: rgb(253, 246, 209);
+}
+#asd{
+  background-color: rgb(253, 246, 209);
 }
 </style>
 
