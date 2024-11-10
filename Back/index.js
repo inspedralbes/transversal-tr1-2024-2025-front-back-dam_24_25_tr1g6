@@ -10,10 +10,12 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const multer = require('multer');
 const { error } = require('console');
+const { spawn } = require('child_process');
 app.use(express.json());
 app.use(cors());
 
 app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')));
+app.use('/grafiques', express.static(path.join(__dirname, 'grafiques')));
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
@@ -127,7 +129,7 @@ app.get('/getComandesBD', (req, res) => {
                                 return {
                                     idComanda: comandes.idComanda,
                                     idUsuari: comandes.idUsuari,
-                                    Productes: null, 
+                                    Productes: null,
                                     PreuTotal: parseFloat(comandes.PreuTotal),
                                     Estat: comandes.Estat,
                                     data: new Date(comandes.data).toISOString()
@@ -435,7 +437,7 @@ app.put('/putEstatBD/:id', async (req, res) => {
         const connection = await createConnection();
 
         await connection.execute(
-            `UPDATE comandes SET Estat = ? WHERE idComanda = ?`, 
+            `UPDATE comandes SET Estat = ? WHERE idComanda = ?`,
             [Estat, idComanda]
         );
 
@@ -448,7 +450,8 @@ app.put('/putEstatBD/:id', async (req, res) => {
     }
 });
 
-app.get('/statistics-clients', async (req, res) => {
+
+app.post('/estadistiques-clients', async (req, res) => {
     const connection = await createConnection();
 
     try {
@@ -462,7 +465,36 @@ app.get('/statistics-clients', async (req, res) => {
             GROUP BY u.Nom;
         `);
 
-        res.json(rows);
+        const rowsJson = JSON.stringify(rows);
+        // Guardar los datos en un archivo temporal
+        const tempFilePath = path.join(__dirname, 'python', `temp_dataClients_${Date.now()}.json`);
+        require('fs').writeFileSync(tempFilePath, rowsJson);
+
+        // Llamar al script de Python usando spawn y enviar la ruta del archivo temporal como argumento
+        const scriptPath = path.join(__dirname, 'python', 'clients.py');
+        const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
+
+        let pythonOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            pythonOutput += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Error en el script de Python: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                return res.status(500).json({ message: "Error generando gráficos" });
+            }
+
+            const imagePath = pythonOutput.trim();
+            res.json({ success: true, imagePathsClients: [imagePath] });
+
+            // Eliminar el archivo temporal
+            require('fs').unlinkSync(tempFilePath);
+        });
     } catch (error) {
         console.error("Error al ejecutar la consulta:", error);
         res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });
@@ -471,8 +503,13 @@ app.get('/statistics-clients', async (req, res) => {
     }
 });
 
-app.get('/statistics-client', async (req, res) => {
-    const { Correu } = req.query;
+
+app.post('/estadistiques-client', async (req, res) => {
+    const { Correu } = req.body;
+
+    if (!Correu) {
+        return res.status(400).json({ message: "Correu és requerit" });
+    }
 
     const connection = await createConnection();
 
@@ -484,10 +521,45 @@ app.get('/statistics-client', async (req, res) => {
         }
 
         const idUsuari = idUsuariResult[0].idUser;
-        
+
         const [rows] = await connection.execute('SELECT * FROM comandes WHERE idUsuari = ?', [idUsuari]);
-        
-        res.json(rows);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "No hi ha comandes per aquest usuari" });
+        }
+
+        const rowsJson = JSON.stringify(rows);
+
+        // Guardar los datos en un archivo temporal
+        const tempFilePath = path.join(__dirname, 'python', `temp_dataClient_${Date.now()}.json`);
+        require('fs').writeFileSync(tempFilePath, rowsJson);
+
+        // Llamar al script de Python usando spawn y enviar el correo como argumento
+        const scriptPath = path.join(__dirname, 'python', 'client.py');
+        const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
+
+        let pythonOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            pythonOutput += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Error en el script de Python: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                return res.status(500).json({ message: "Error generando gráficos" });
+            }
+
+            // Asegúrate de que pythonOutput sea la ruta completa de la imagen
+            const imagePath = pythonOutput.trim();
+            console.log("imagePath", imagePath);
+            res.json({ success: true, imagePaths: [imagePath] });
+
+            // Eliminar el archivo temporal
+            require('fs').unlinkSync(tempFilePath);
+        });
     } catch (error) {
         console.error("Error en executar la consulta: ", error);
         res.status(500).json({ message: "No es va poder executar la consulta", error: error.message });

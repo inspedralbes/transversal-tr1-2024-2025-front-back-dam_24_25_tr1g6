@@ -86,7 +86,7 @@ export async function eliminarProducte(idProducte) {
         const response = await fetch(`${import.meta.env.VITE_URL_BACK}/deleteProducteBD/${idProducte}`, {
             method: 'DELETE',
         });
-        
+
         if (!response.ok) {
             throw new Error('Error al eliminar el producte');
         }
@@ -122,4 +122,37 @@ export async function updateEstat(idComanda, Estat) {
     }
 }
 
+export async function estadisticasPythonUnClient(correu) {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_URL_BACK}/estadistiques-client`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ Correu: correu })
+        });
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error("Error en la comunicación con el servidor:", err); // Error de red
+        throw err;
+    }
+}
+
+export async function getEstadisticasPythonClients() {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_URL_BACK}/estadistiques-clients`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+
+        });
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error("Error en la comunicación con el servidor:", err); // Error de red
+        throw err;
+    }
+}
 
