@@ -538,7 +538,7 @@ app.put('/putEstatBD/:id', async (req, res) => {
 });
 
 
-app.get('/estadistiques-clients', async (req, res) => {
+app.post('/estadistiques-clients', async (req, res) => {
     const connection = await createConnection();
 
     try {
@@ -552,17 +552,13 @@ app.get('/estadistiques-clients', async (req, res) => {
             GROUP BY u.Nom;
         `);
 
-        console.log("rows", rows);
-
         const rowsJson = JSON.stringify(rows);
-
-
         // Guardar los datos en un archivo temporal
-        const tempFilePath = path.join(__dirname, 'python', 'temp_dataClients.json');
+        const tempFilePath = path.join(__dirname, 'python', `temp_dataClients_${Date.now()}.json`);
         require('fs').writeFileSync(tempFilePath, rowsJson);
 
         // Llamar al script de Python usando spawn y enviar la ruta del archivo temporal como argumento
-        const scriptPath = path.join(__dirname, 'python', 'pruebaClients.py');
+        const scriptPath = path.join(__dirname, 'python', 'clients.py');
         const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
 
         let pythonOutput = '';
@@ -581,7 +577,7 @@ app.get('/estadistiques-clients', async (req, res) => {
             }
 
             const imagePath = pythonOutput.trim();
-            res.json({ success: true, imagePaths: [imagePath] });
+            res.json({ success: true, imagePathsClients: [imagePath] });
 
             // Eliminar el archivo temporal
             require('fs').unlinkSync(tempFilePath);
@@ -621,13 +617,12 @@ app.post('/estadistiques-client', async (req, res) => {
         const rowsJson = JSON.stringify(rows);
 
         // Guardar los datos en un archivo temporal
-        const tempFilePath = path.join(__dirname, 'python', 'temp_dataClient.json');
+        const tempFilePath = path.join(__dirname, 'python', `temp_dataClient_${Date.now()}.json`);
         require('fs').writeFileSync(tempFilePath, rowsJson);
 
         // Llamar al script de Python usando spawn y enviar el correo como argumento
         const scriptPath = path.join(__dirname, 'python', 'client.py');
-        // const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
-        const pythonProcess = spawn('py', [scriptPath, tempFilePath]);
+        const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
 
         let pythonOutput = '';
 
@@ -645,9 +640,12 @@ app.post('/estadistiques-client', async (req, res) => {
             }
 
             // Asegúrate de que pythonOutput sea la ruta completa de la imagen
-            const imagePath = path.join(pythonOutput.trim());
+            const imagePath = pythonOutput.trim();
             console.log("imagePath", imagePath);
             res.json({ success: true, imagePaths: [imagePath] });
+
+            // Eliminar el archivo temporal
+            require('fs').unlinkSync(tempFilePath);
         });
     } catch (error) {
         console.error("Error en executar la consulta: ", error);
@@ -656,8 +654,6 @@ app.post('/estadistiques-client', async (req, res) => {
         connection.end();
     }
 });
-
-
 
 // Iniciar el servidor
 server.listen(PORT, () => {

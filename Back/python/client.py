@@ -5,7 +5,7 @@ import numpy as np
 import os  # No eliminar
 import json
 
-# Funció per crear el gràfic de barres de l'historial de vendes d'un client
+# Funció per crear el gràfic de barres de l'historial de vendes d'un client amb estils millorats
 def crear_grafic_historial_vendes(df_comandes):
     try:
         # Assegurar-se que la columna 'PreuTotal' és numèrica
@@ -28,23 +28,30 @@ def crear_grafic_historial_vendes(df_comandes):
         # Crear les posicions de les barres basades en les dates
         x_positions = np.arange(len(df_comandes))
         
-        # Crear el gràfic de barres
-        plt.figure(figsize=(10, 6))  # Ajustar la mida del gràfic
-        bars = plt.bar(x_positions, preu_total, color='lightblue', width=0.6, align='center')
+        # Crear el gràfic de barres amb estil de fons i colors personalitzats
+        plt.figure(figsize=(12, 7))  # Ajustar la mida del gràfic
+        plt.gca().set_facecolor('whitesmoke')  # Color de fons del gràfic
+        
+        # Crear les barres amb colors alterns
+        colors = ['skyblue' if i % 2 == 0 else 'lightcoral' for i in range(len(preu_total))]
+        bars = plt.bar(x_positions, preu_total, color=colors, width=0.6, align='center', edgecolor='black')
 
-        # Etiquetes i títol
-        plt.xlabel("Data")
-        plt.ylabel("Preu Total (€)")
-        plt.title("Historial de Vendes del Client")
+        # Etiquetes i títol amb estils millorats
+        plt.xlabel("Data", fontsize=12, fontweight='bold')
+        plt.ylabel("Preu Total (€)", fontsize=12, fontweight='bold')
+        plt.title("Historial de Vendes del Client", fontsize=14, fontweight='bold', color='navy')
         
         # Afegir etiquetes de valors a sobre de cada barra
         for bar in bars:
             plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
-                     f'{bar.get_height():.2f}', ha='center', va='bottom', fontsize=9)
+                     f'{bar.get_height():.2f}', ha='center', va='bottom', fontsize=10, color='black')
 
         # Configurar les etiquetes de l'eix X per mostrar les dates
         plt.xticks(x_positions, df_comandes['data'].dt.strftime('%Y-%m-%d'), rotation=45, ha="right", fontsize=10)
-        
+
+        # Afegir línies de quadrícula estilitzades
+        plt.grid(axis='y', linestyle='--', linewidth=0.5, color='gray', alpha=0.7)
+
         # Afegir les estadístiques a la imatge, a l'esquerra
         stats_text = (f"Estadístiques de les vendes del client:\n"
                       f"Mitjana del preu total: {mitjana_preu:.2f} €\n"
@@ -64,9 +71,9 @@ def crear_grafic_historial_vendes(df_comandes):
 
         # Guardar el gràfic com a imatge a la carpeta 'Grafiques'
         output_path = 'grafiques/historial_vendes_del_client.png'
-        plt.savefig(output_path)  # Nom de la imatge
+        plt.savefig(output_path, bbox_inches='tight')  # Nom de la imatge
 
-        # Mostrar el gràfic
+        # Mostrar el gràfic (opcional)
         # plt.show()
 
         # Retornar la ruta de la imatge
