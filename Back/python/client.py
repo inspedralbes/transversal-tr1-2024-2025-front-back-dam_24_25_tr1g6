@@ -67,7 +67,7 @@ def crear_grafic_historial_vendes(df_comandes):
         plt.savefig(output_path)  # Nom de la imatge
 
         # Mostrar el gràfic
-        plt.show()
+        # plt.show()
 
         # Retornar la ruta de la imatge
         return output_path
