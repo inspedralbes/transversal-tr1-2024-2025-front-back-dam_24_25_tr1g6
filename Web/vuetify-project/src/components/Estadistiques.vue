@@ -39,9 +39,9 @@ export default {
         if (data.success && data.imagePaths && data.imagePaths.length > 0) {
           // Asignar la ruta de la imagen al estado
           // Suponiendo que la ruta de la imagen se devuelve relativa al servidor
-          imagePath.value = `${import.meta.env.VITE_URL_BACK}${
-            data.imagePaths[0]
-          }`;
+          imagePath.value = `${import.meta.env.VITE_URL_BACK}/`+`${data.imagePaths[0]}`;
+          console.log(imagePath.value);
+          
         } else {
           // Manejar el caso en que no se haya generado la imagen
           console.error("No se generó la imagen de estadísticas.");

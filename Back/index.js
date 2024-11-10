@@ -626,7 +626,8 @@ app.post('/estadistiques-client', async (req, res) => {
 
         // Llamar al script de Python usando spawn y enviar el correo como argumento
         const scriptPath = path.join(__dirname, 'python', 'client.py');
-        const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
+        // const pythonProcess = spawn('python3', [scriptPath, tempFilePath]);
+        const pythonProcess = spawn('py', [scriptPath, tempFilePath]);
 
         let pythonOutput = '';
 
