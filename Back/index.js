@@ -17,12 +17,11 @@ app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*", // Or restrict it to your Android emulator/device IP
+        origin: "*",
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
 
-let json;
 let uploadedImages = {};
 
 const storage = multer.diskStorage({
@@ -48,88 +47,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Llegir el fitxer JSON amb els productes
-app.get('/getProductes', (req, res) => {
-    res.send(json.productes);
-});
-
-// Eliminar producte JSON
-app.delete('/deleteProduct/:id', (req, res) => {
-    const idProduct = parseInt(req.params.id);
-    let productes = json.productes;
-
-    const producteIndex = productes.findIndex(p => parseInt(p.idProducte) === idProduct);
-    if (producteIndex === -1) {
-        return res.status(404).send('Producte no trobat');
-    };
-
-    productes.splice(producteIndex, 1);
-    console.log("Producte esborrat: " + productes[producteIndex]);
-
-    json.productes = productes;
-
-    fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
-        if (err) {
-            console.error('Error escrivint el fitxer JSON', err);
-            return res.status(500).send('Error eliminant el producte');
-        }
-        console.log("producte index", idProduct);
-        res.json(idProduct);
-    });
-});
-
-// Actualitzar Producte JSON
-app.put('/putProducte/:id', (req, res) => {
-    const idProduct = parseInt(req.params.id);
-    let productes = json.productes;
-
-    const producte = productes.find(p => p.idProducte === idProduct);
-
-    if (!producte) {
-        return res.status(404).send("Producte no trobat");
-    }
-
-    producte.nomProducte = req.body.nomProducte || producte.nomProducte;
-    producte.Descripcio = req.body.Descripcio || producte.Descripcio;
-    producte.Preu = req.body.Preu || producte.Preu;
-    producte.Stock = req.body.Stock || producte.Stock;
-    producte.Imatge = req.body.Imatge || producte.Imatge;
-
-    json.productes = productes;
-
-    fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
-        if (err) {
-            console.error('Error escrivint el fitxer JSON', err);
-            return res.status(500).send('Error actualitzant el producte');
-        }
-        res.json(producte);
-    });
-});
-
-
-// Afegir Producte JSON
-app.post('/postProducte', (req, res) => {
-    const newProduct = req.body;
-    let productes = json.productes;
-
-    const newIndex = productes.length + 1;
-    newProduct.idProducte = newIndex;
-    productes.push(newProduct);
-
-    json.productes = productes;
-    console.log("array productes", productes);
-
-    fs.writeFile('./db/Productes.json', JSON.stringify(json, null, 2), (err) => {
-        if (err) {
-            console.error('Error escrivint el fitxer JSON', err);
-            return res.status(500).send('Error afegint el producte');
-        }
-        res.json({ message: 'Producte afegit correctament!', product: newProduct })
-    });
-
-});
-
-// Crear connexió de Base de Dades
 function createConnection() {
     return mysql.createConnection({
         // host: 'dam.inspedralbes.cat',
@@ -148,11 +65,10 @@ function createConnection() {
         })
         .catch(err => {
             console.error('Error de connexió: ' + err);
-            throw err; // Re-lanzar el error para que pueda ser manejado por el llamador
+            throw err;
         });
 }
 
-// Get Preguntes Base de Dades
 app.get('/getProductesBD', (req, res) => {
     createConnection()
         .then(connection => {
@@ -184,7 +100,6 @@ app.get('/getProductesBD', (req, res) => {
         });
 });
 
-// Get Comandes Base de Dades
 app.get('/getComandesBD', (req, res) => {
     console.log("hola");
     createConnection()
@@ -232,8 +147,6 @@ app.get('/getComandesBD', (req, res) => {
         });
 });
 
-
-// Post Producte Base de Dades
 app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
     const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
 
@@ -284,24 +197,20 @@ app.post('/postProducteBD', upload.single('Imatge'), async (req, res) => {
         });
 });
 
-// Update Producte Base de Dades
 app.put('/putProducteBD/:id', upload.single('Imatge'), async (req, res) => {
     const idProducte = parseInt(req.params.id);
     const { nomProducte, Descripcio, Preu, Stock, Activat } = req.body;
 
     const connection = await createConnection();
 
-    // Verificar si se ha subido una nueva imagen
-    let imatgePath = req.file ? req.file.path : null; // Si no se sube nueva imagen, será null
+    let imatgePath = req.file ? req.file.path : null;
     const imatge = imatgePath ? path.basename(imatgePath) : null;
 
-    // Obtener la imagen actual de la base de datos
     const [rows] = await connection.execute(`SELECT Imatge FROM producte WHERE idProducte = ?`, [idProducte]);
-    const currentImagePath = rows.length > 0 ? rows[0].Imatge : null; // Imagen actual
+    const currentImagePath = rows.length > 0 ? rows[0].Imatge : null;
 
     const finalImage = imatge || currentImagePath;
 
-    // Si no hay una nueva imagen, mantén la imagen actual
     return connection.execute(
         `UPDATE producte 
         SET nomProducte = ?, Descripcio = ?, Preu = ?, Stock = ?, Imatge = ?, Activat = ? 
@@ -330,11 +239,8 @@ app.put('/putProducteBD/:id', upload.single('Imatge'), async (req, res) => {
         });
 });
 
-
-// Delete Producte Base de Dades
 app.delete('/deleteProducteBD/:id', async (req, res) => {
     const idProducte = req.params.id;
-    console.log("idProducte", idProducte);
 
     const connection = await createConnection();
 
@@ -370,7 +276,6 @@ function data(data) {
     return dataFormatjada;
 }
 
-// Get de les comandes del historial de l'usuari desde l'Android
 app.get('/getHistorialComandes/:id', async (req, res) => {
     const idUsuari = parseInt(req.params.id);
 
@@ -404,7 +309,6 @@ app.post('/registerBD', async (req, res) => {
     const connection = await createConnection();
 
     try {
-        // Ejecutar la inserción
         const [result] = await connection.execute(
             `INSERT INTO usuari (Nom, Correu, Contrasenya) 
             VALUES (?, ?, ?)`,
@@ -420,14 +324,12 @@ app.post('/registerBD', async (req, res) => {
             Confirmacio: true
         };
 
-        console.log("Usuari afegit: ", newUsuari);
         res.json(newUsuari);
-
     } catch (error) {
         console.error('Error afegint usuari:', error);
         res.json({ Confirmacio: false });
     } finally {
-        await connection.end(); // Asegúrate de cerrar la conexión
+        await connection.end();
     }
 });
 
@@ -435,8 +337,6 @@ app.post('/loginBD', async (req, res) => {
     const { Correu, Contrasenya } = req.body
 
     const connection = await createConnection();
-
-    console.log("Correu: " + Correu + " Contrasenya: " + Contrasenya)
 
     try {
         const [usuari] = await connection.execute(`SELECT * FROM usuari WHERE Correu = ? AND Contrasenya = ?`, [Correu, Contrasenya]);
@@ -448,10 +348,8 @@ app.post('/loginBD', async (req, res) => {
             Confirmacio: true
         }
 
-        console.log(1)
         res.json(response)
     } catch (err) {
-        console.log(2)
         res.json({ Confirmacio: false });
     }
 });
@@ -515,7 +413,6 @@ app.post('/newComandesBD', async (req, res) => {
             data: result[0].data
         }
 
-        // Preparar respuesta para enviar a través de Socket.IO y al cliente
         const response = Productes.map(element => ({
             idProducte: element.idProducte,
             Stock: element.quantitat
@@ -529,7 +426,6 @@ app.post('/newComandesBD', async (req, res) => {
     } finally {
         connection.end();
     }
-
 });
 
 app.put('/putEstatBD/:id', async (req, res) => {
@@ -538,7 +434,6 @@ app.put('/putEstatBD/:id', async (req, res) => {
 
     try {
         const connection = await createConnection();
-        console.log("Conexión a la base de datos establecida");
 
         await connection.execute(
             `UPDATE comandes SET Estat = ? WHERE idComanda = ?`, 
@@ -602,8 +497,6 @@ app.get('/statistics-client', async (req, res) => {
     }
 });
 
-
-// Iniciar el servidor
 server.listen(PORT, () => {
     console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });
