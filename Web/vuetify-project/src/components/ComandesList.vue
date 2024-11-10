@@ -1,4 +1,5 @@
 <template>
+  <v-app class="background">
   <v-container>
     <v-row>
       <v-col cols="6" class="text-left">
@@ -8,42 +9,44 @@
           append-inner-icon="mdi-magnify"
           density="compact"
           label="Buscar Comanda per ID"
-          variant="solo"
+          variant="filled"
           hide-details
           single-line
         ></v-text-field>
       </v-col>
       <v-col cols="6" class="text-right">
         <v-select
+          solo background-color='primary'
           v-model="statusFilter"
           :items="['PENDENT_PER_PREPARACIO', 'EN_PREPARACIO', 'PREPARAT_PER_RECOLLIR', 'RECOLLIT']"
           label="Filtrar per Estat"
           prepend-icon="mdi-filter"
           dense
-          outlined
-          @change="totesLesComandes"
-          hide-details
-        ></v-select>
+          outlined>
+        </v-select>
       </v-col>
     </v-row>
   </v-container>
-
   <v-container>
     <v-row>
       <v-col>
         <v-card>
-          <v-card-title>
-            <h2>Comandes</h2>
+          <v-card-title class="asd">
+            <h2 class="tit">Comandes</h2>
           </v-card-title>
-          <v-card-text>
+          <v-card-text class="asd">
             <v-data-table
               :headers="headers"
               :items="filteredComandes" 
               :loading="loading"
+              loading-text="Buscant informació"
               class="elevation-1"
-              hide-default-footer>
+              no-data-text="No hi ha comandes disponibles"
+              hide-default-footer
+              id="asd">
               <template v-slot:item.Estat="{item}">
                 <v-btn
+                  :style="getButtonStyle(item.Estat)"
                   @click="cambiarEstado(item)">
                   {{item.Estat}}
                 </v-btn>
@@ -54,7 +57,7 @@
       </v-col>
     </v-row>
     <v-snackbar
-      :timeout="1500"
+      :timeout="2500"
       color="success"
       variant="outlined"
       v-model="showAlert">
@@ -63,6 +66,7 @@
       <span class="textAlert">Nova comanda afegida</span>
     </v-snackbar>
   </v-container>
+</v-app>
 </template>
 
 <script setup>
@@ -81,6 +85,20 @@ const estats = ref([
   'PREPARAT_PER_RECOLLIR',
   'RECOLLIT'
 ]);
+
+const getButtonStyle = (status) => {
+  switch (status) {
+    case 'PENDENT_PER_PREPARACIO':
+      return { backgroundColor: '#FF6868', color: 'white' };
+    case 'EN_PREPARACIO':
+      return { backgroundColor: '#FFBB64', color: 'white' };
+    case 'PREPARAT_PER_RECOLLIR':
+      return { backgroundColor: '#FFEAA7', color: 'black' };
+    case 'RECOLLIT':
+      return { backgroundColor: '#DCFFB7', color: 'black' };
+  }
+};
+
 const showAlert = ref(false);  
 
 onMounted(async () => {
@@ -150,11 +168,24 @@ const formatProductes = (Productes) => {
 
 funcionSockets(comandes, formatProductes, showAlert);
 </script>
-<style>
+<style scoped>
 .textAlert{
   text-align: center;
   display: block;
   width: 100%;
+}
+.background{
+  background-color: rgb(255, 251, 230);
+}
+.tit{
+  color: rgb(255, 187, 100);
+  text-shadow: 1px 1px 2px rgb(0, 0, 0); 
+}
+.asd{
+  background-color: rgb(253, 246, 209);
+}
+#asd{
+  background-color: rgb(253, 246, 209);
 }
 </style>
 

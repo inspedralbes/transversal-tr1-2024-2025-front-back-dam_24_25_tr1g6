@@ -1,8 +1,9 @@
 <template>
+  <v-app class="background">
   <v-container>
     <v-row align="center" justify="space-between">
       <v-col cols="4">
-        <h2>Llista de Productes</h2>
+        <h2 class="tit">Llista de Productes</h2>
       </v-col>
       <v-col cols="4" class="text-center">
         <v-btn
@@ -20,7 +21,7 @@
           append-inner-icon="mdi-magnify"
           density="compact"
           label="Buscar"
-          variant="solo"
+          variant="filled"
           hide-details
           single-line
         ></v-text-field>
@@ -100,7 +101,7 @@
                   ></v-checkbox>
                 </v-col>
               </v-row>
-              <v-btn type="submit" color="primary" class="mt-4">Afegir</v-btn>
+              <v-btn type="submit" id="botoAfegir" class="mt-4">Afegir</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -109,7 +110,7 @@
 
     <v-row>
       <v-col cols="12">
-        <v-list>
+        <v-list class="product-list-item">
           <v-list-item
             v-for="product in filteredProductes"
             :key="product.nomProducte"
@@ -271,10 +272,10 @@
                           ></v-checkbox>
                         </v-col>
                       </v-row>
-                      <v-btn type="submit" color="primary" class="mt-4"
+                      <v-btn type="submit" class="guardar"
                         >Guardar</v-btn
                       >
-                      <v-btn @click="cancelEdit" color="secondary" class="mt-4"
+                      <v-btn @click="cancelEdit" class="cancelar" 
                         >Cancelar</v-btn
                       >
                     </v-form>
@@ -287,6 +288,7 @@
       </v-col>
     </v-row>
   </v-container>
+</v-app>
 </template>
 
 <script setup>
@@ -445,6 +447,7 @@ onMounted(async () => {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgb(255, 234, 167);
 }
 
 .edit-product-card {
@@ -452,6 +455,7 @@ onMounted(async () => {
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
+  background-color: rgb(255, 234, 167);
 }
 
 .headline {
@@ -461,28 +465,30 @@ onMounted(async () => {
 }
 
 .activated {
-  background-color: lightgreen;
+  background-color: rgb(220, 255, 183);
   padding: 5px;
   border-radius: 10px;
 }
 
 .blocked {
-  background-color: lightcoral;
+  background-color: rgb(255, 104, 104);
   padding: 5px;
   border-radius: 10px;
 }
 
 .stock-disponible {
-  color: green;
+  color: rgb(220, 255, 183);
+  text-shadow: 1px 1px 2px rgb(0, 0, 0); 
 }
 
 .stock-no-disponible {
-  color: red;
+  color: rgb(255, 104, 104);
+  text-shadow: 1px 1px 2px rgb(0, 0, 0); 
 }
 
 .product-list-item {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 10px 0;
+  background-color: rgb(255, 251, 230);
+  padding: 5px;
 }
 
 .v-list-item-avatar {
@@ -501,5 +507,21 @@ onMounted(async () => {
 
 .v-btn {
   margin-left: 5px;
+}
+.background{
+  background-color: rgb(255, 251, 230);
+}
+#botoAfegir{
+  background-color: rgb(220, 255, 183);
+}
+.tit{
+  color: rgb(255, 187, 100);
+  text-shadow: 1px 1px 2px rgb(0, 0, 0); 
+}
+.guardar{
+  background-color: rgb(220, 255, 183);
+}
+.cancelar{
+  background-color: rgb(255, 104, 104);
 }
 </style>
