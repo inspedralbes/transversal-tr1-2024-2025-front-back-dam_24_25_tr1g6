@@ -56,21 +56,21 @@ CREATE TABLE `producte` (
 -- Bolcament de dades per a la taula `producte`
 --
 
-INSERT INTO `producte` (`idProducte`, `nomProducte`, `Descripcio`, `Preu`, `Stock`, `Activat`, `Imatge`, `categoria_id`) VALUES
-(1, 'Suc de Taronja ', 'Suc de taronja natural 100%', 1.50, 96, 1, 'orange-juice.jpg', NULL),
-(2, 'Suc de Poma', 'Suc de poma natural 100%', 2.00, 82, 1, 'apple-juice.jpg', NULL),
-(3, 'Suc de Raïm', 'Suc de raïm natural 100%', 3.00, 72, 1, 'grape-juice.jpg', NULL),
-(4, 'Suc de Pinya', 'Suc de pinya natural 100%', 2.5, 65, 1, 'pineapple-juice.jpg', NULL),
-(5, 'Suc de Maduixa', 'Suc de maduixa natural 100%', 2.50, 67, 1, 'strawberry-juice.jpg', NULL),
-(6, 'Suc de Mango', 'Suc de mango natural 100%', 2.00, 45, 1, 'mango-juice.jpg', NULL),
-(7, 'Suc de Meló', 'Suc de meló natural 100%', 1.50, 10, 1, 'melon-juice.jpg', NULL),
-(8, 'Suc de Plàtan', 'Suc de plàtan natural 100%', 2.50, 34, 1, 'banana-juice.jpg', NULL),
-(9, 'Suc de Mandarina', 'Suc de mandarina natural 100%', 3.50, 87, 1, 'mandarin-juice.jpg', NULL),
-(10, 'Suc de Coco', 'Suc de coco natural 100%', 2.00, 67, 1, 'coconut-juice.jpg', NULL),
-(11, 'Suc de Mora', 'Suc de mora natural 100%', 3.00, 0, 0, 'blackberry-juice.jpg', NULL),
-(12, 'Suc de Pomelo', 'Suc de pomelo natural 100%', 2.50, 94, 1, 'grapefruit-juice.jpg', NULL),
-(13, 'Suc de Lima', 'Suc de lima natural 100%', 2.00, 10, 1, 'lime-juice.jpg', NULL),
-(14, 'Suc de Síndria', 'Suc de síndria natural 100%', 3.50, 56, 1, 'watermelon-juice.jpg', NULL);
+INSERT INTO `producte` (`idProducte`, `nomProducte`, `Descripcio`, `Preu`, `Stock`, `Activat`, `Imatge`) VALUES
+(1, 'Suc de Taronja ', 'Suc de taronja natural 100%', 1.50, 96, 1, 'orange-juice.jpg'),
+(2, 'Suc de Poma', 'Suc de poma natural 100%', 2.00, 82, 1, 'apple-juice.jpg'),
+(3, 'Suc de Raïm', 'Suc de raïm natural 100%', 3.00, 72, 1, 'grape-juice.jpg'),
+(4, 'Suc de Pinya', 'Suc de pinya natural 100%', 2.5, 65, 1, 'pineapple-juice.jpg'),
+(5, 'Suc de Maduixa', 'Suc de maduixa natural 100%', 2.50, 67, 1, 'strawberry-juice.jpg'),
+(6, 'Suc de Mango', 'Suc de mango natural 100%', 2.00, 45, 1, 'mango-juice.jpg'),
+(7, 'Suc de Meló', 'Suc de meló natural 100%', 1.50, 10, 1, 'melon-juice.jpg'),
+(8, 'Suc de Plàtan', 'Suc de plàtan natural 100%', 2.50, 34, 1, 'banana-juice.jpg'),
+(9, 'Suc de Mandarina', 'Suc de mandarina natural 100%', 3.50, 87, 1, 'mandarin-juice.jpg'),
+(10, 'Suc de Coco', 'Suc de coco natural 100%', 2.00, 67, 1, 'coconut-juice.jpg'),
+(11, 'Suc de Mora', 'Suc de mora natural 100%', 3.00, 0, 0, 'blackberry-juice.jpg'),
+(12, 'Suc de Pomelo', 'Suc de pomelo natural 100%', 2.50, 94, 1, 'grapefruit-juice.jpg'),
+(13, 'Suc de Lima', 'Suc de lima natural 100%', 2.00, 10, 1, 'lime-juice.jpg'),
+(14, 'Suc de Síndria', 'Suc de síndria natural 100%', 3.50, 56, 1, 'watermelon-juice.jpg');
 
 -- --------------------------------------------------------
 
