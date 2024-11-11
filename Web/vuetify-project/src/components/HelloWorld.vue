@@ -1,11 +1,16 @@
 <template>
   <v-app class="background">
     <!-- Contenedor principal con el contenido centrado -->
-    <v-container class="text-center">
+    <v-container
+      class="text-center d-flex justify-center align-center"
+      style="height: 100vh"
+    >
       <!-- Encabezado -->
-      <v-row justify="center">
+      <v-row justify="center" class="text-center">
         <v-col cols="12" class="text-center">
-          <h2 class="Bienvenida">Benvingut a la pàgina d'administració de JuiceN'Go</h2>
+          <h2 class="Bienvenida">
+            Benvingut a la pàgina d'administració de JuiceN'Go
+          </h2>
           <h3 class="slogan">Gestiona els productes i comandes fàcilment!</h3>
         </v-col>
       </v-row>
@@ -13,22 +18,14 @@
       <!-- Botón de "Entrar" -->
       <v-row justify="center" class="mt-5">
         <v-col cols="12" sm="6">
-          <v-btn 
-            large 
-            block 
-            color="primary" 
+          <v-btn
+            to="/productes"
+            large
+            block
             @click="goToAdminPanel"
-            class="entrar-btn">
+            class="entrar-btn"
+          >
             Entrar a l'Administració
-          </v-btn>
-        </v-col>
-      </v-row>
-
-      <!-- Icono de configuración -->
-      <v-row justify="flex-end" class="mt-5">
-        <v-col cols="12" sm="1">
-          <v-btn icon color="primary" @click="goToSettings">
-            <v-icon>mdi-cogs</v-icon>
           </v-btn>
         </v-col>
       </v-row>
@@ -37,13 +34,6 @@
 </template>
 
 <script setup>
-const goToAdminPanel = () => {
-  // Lógica para navegar al panel de administración
-};
-
-const goToSettings = () => {
-  // Lógica para navegar a la página de configuración
-};
 </script>
 
 <style scoped>
@@ -57,12 +47,13 @@ const goToSettings = () => {
 .slogan {
   margin-top: 10px;
   color: #ff9800;
-  font-size: 1.5em;
+  font-size: 2em;
   font-style: italic;
+  text-shadow: 2px 2px 4px rgb(0, 0, 0);
 }
 
 .background {
-  background-image: url('../assets/Background_Store.jpg');
+  background-image: url("../assets/background-image.jpg"); /* Se ha cambiado el nombre de la imagen */
   background-size: cover;
   background-position: center;
   min-height: 100vh;
@@ -77,7 +68,7 @@ const goToSettings = () => {
 
 .entrar-btn {
   font-weight: bold;
-  background-color: #ff9800;
+  background-color: #f57c00;
   color: white;
   transition: background-color 0.3s ease;
 }

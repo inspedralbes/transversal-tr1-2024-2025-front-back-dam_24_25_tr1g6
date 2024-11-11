@@ -32,11 +32,10 @@
 </script>
 
 <style scoped>
-
-.options{
+.options {
   background-color: rgb(255, 251, 230);
 }
-#tabla{
+#tabla {
   background-color: rgb(255, 234, 167);
 }
 </style>
