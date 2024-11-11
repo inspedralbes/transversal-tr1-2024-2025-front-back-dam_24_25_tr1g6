@@ -52,9 +52,9 @@ io.on('connection', (socket) => {
 function createConnection() {
     return mysql.createConnection({
         host: 'dam.inspedralbes.cat',
-        user: 'a21rublormar_admin',
+        user: 'a23marclacas_tr1_juicengo',
         password: 'InsPedralbes2024',
-        database: 'a21rublormar_TR1_GR6'
+        database: 'a23marclacas_tr1_juicengo',
         // host: 'localhost',
         // user: 'root',
         // password: '',

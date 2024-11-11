@@ -274,7 +274,7 @@
                             ></v-checkbox>
                           </v-col>
                         </v-row>
-                        <v-btn type="submit" class="guardar">Guardar</v-btn>
+                        <v-btn @type="submit" class="guardar">Guardar</v-btn>
                         <v-btn @click="cancelEdit" class="cancelar"
                           >Cancelar</v-btn
                         >
@@ -394,6 +394,13 @@ const callEditProduct = async () => {
     editingProduct.value = null;
   } catch (error) {
     console.error("Error updating product:", error);
+  }
+
+  const response = await getProductes();
+  if (Array.isArray(response.productes)) {
+    productes.value = response.productes;
+  } else {
+    console.error("El JSON de productos no es un array");
   }
 };
 
