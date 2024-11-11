@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const fs = require('fs')
 const mysql = require('mysql2/promise');
-const PORT = 3010;
+const PORT = 20871;
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -19,7 +19,7 @@ app.use('/grafiques', express.static(path.join(__dirname, 'grafiques')));
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ["http://juicengo.dam.inspedralbes.cat:20871","http://localhost:3010"],
+        origin: ["http://juicengo.dam.inspedralbes.cat:20871", "http://localhost:3010"],
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
@@ -51,15 +51,15 @@ io.on('connection', (socket) => {
 
 function createConnection() {
     return mysql.createConnection({
-        // host: 'dam.inspedralbes.cat',
-        // user: 'a21rublormar_admin',
-        // password: 'InsPedralbes2024',
-        // database: 'a21rublormar_TR1_GR6'
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'a21rublormar_TR1_GR6',
-        port: 3306
+        host: 'dam.inspedralbes.cat',
+        user: 'a21rublormar_admin',
+        password: 'InsPedralbes2024',
+        database: 'a21rublormar_TR1_GR6'
+        // host: 'localhost',
+        // user: 'root',
+        // password: '',
+        // database: 'a21rublormar_TR1_GR6',
+        // port: 3306
     })
         .then(connection => {
             console.log("Connexió creada");
@@ -359,7 +359,7 @@ app.post('/loginBD', async (req, res) => {
 app.put('/updatePerfil/:id', async (req, res) => {
     const idUsuari = parseInt(req.params.id);
     const { Nom, Correu, Contrasenya } = req.body;
-    
+
     const connection = await createConnection();
 
     try {
@@ -569,5 +569,5 @@ app.post('/estadistiques-client', async (req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Servidor en funcionament a http://localhost:${PORT}`);
+    console.log(`Servidor en funcionament a http://juicengo.dam.inspedralbes.cat:${PORT}`);
 });

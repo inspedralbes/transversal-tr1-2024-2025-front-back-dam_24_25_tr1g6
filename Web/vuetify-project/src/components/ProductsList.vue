@@ -120,7 +120,7 @@
                 <v-col cols="1">
                   <v-list-item-avatar>
                     <v-img
-                      :src="`http://localhost:3010/uploads/images/${product.Imatge}`"
+                      :src="`http://juicengo.dam.inspedralbes.cat:20871/uploads/images/${product.Imatge}`"
                       height="50"
                       width="50"
                       rounded="lg"

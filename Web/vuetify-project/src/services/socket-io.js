@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3010");
+const socket = io("http://juicengo.dam.inspedralbes.cat:20871");
 
 export const funcionSockets = (comandes, formatProductes, showAlert) => {
   socket.on("new-comanda", (newComanda) => {
