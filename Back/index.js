@@ -19,7 +19,7 @@ app.use('/grafiques', express.static(path.join(__dirname, 'grafiques')));
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ["http://juicengo.dam.inspedralbes.cat:20871", "http://localhost:3010"],
+        origin: "*",
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
