@@ -132,15 +132,15 @@
                     <span v-if="product.Stock > 0" class="stock-disponible"
                       >Stock disponible {{ product.Stock }}</span
                     >
-                    <span v-else class="stock-no-disponible">Sin stock</span>
+                    <span v-else class="stock-no-disponible">Sense stock</span>
                   </v-list-item-title>
                 </v-col>
                 <v-col cols="2">
                   <v-list-item-subtitle>
                     <span v-if="product.Activat === 1" class="activated"
-                      >Activado</span
+                      >Activat</span
                     >
-                    <span v-else class="blocked">Desactivado</span>
+                    <span v-else class="blocked">Desactivat</span>
                   </v-list-item-subtitle>
                 </v-col>
                 <v-col cols="2">
